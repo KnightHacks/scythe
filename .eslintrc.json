@@ -1,0 +1,41 @@
+{
+    "root": true,
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "project": "./tsconfig.json"
+    },
+    "env": {
+      "jest": true,
+      "node": true
+    },
+    "plugins": [
+      "@typescript-eslint"
+    ],
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended"
+    ],
+    "rules": {
+      "semi": "off",
+      "@typescript-eslint/semi": ["error"],
+      "@typescript-eslint/member-delimiter-style": ["error" ,{
+        "multiline": {
+            "delimiter": "semi",
+            "requireLast": true
+        },
+        "singleline": {
+            "delimiter": "semi",
+            "requireLast": false
+        },
+        "multilineDetection": "brackets"
+      }],
+      "indent": "off",
+      "@typescript-eslint/indent": ["error", 2, {
+        "ignoredNodes": ["TSTypeParameterInstantiation"]
+      }],
+      "@typescript-eslint/explicit-module-boundary-types": ["error"],
+      "quotes": "off",
+      "@typescript-eslint/quotes": ["error", "single"]
+    }
+}
