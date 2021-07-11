@@ -18,7 +18,7 @@ export default class Client extends discord.Client {
     this.commandDispatch = new MessageDispatcher(this.commands);
 
     // Register commands on connection
-    this.on('ready', async () => {
+    this.once('ready', async () => {
       if (process.env.GUILD_ID) {
         const guild = this.guilds.cache.get(process.env.GUILD_ID);
         const jsonCommands = this.commands.all.map(normalizeCommand);
