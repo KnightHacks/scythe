@@ -1,5 +1,5 @@
 {
-  "name": "typescript-template",
+  "name": "dispatch",
   "version": "1.0.1",
   "description": "A template for running typescript on the nodejs platform",
   "main": "src/index.ts",
@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/suneettipirneni/node-typescript-template.git"
+    "url": "https://github.com/KnightHacks/dispatch.git"
   },
   "author": "Suneet Tipirneni",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/suneettipirneni/node-typescript-template/issues"
+    "url": "https://github.com/KnightHacks/dispatch/issues"
   },
-  "homepage": "https://github.com/suneettipirneni/node-typescript-template#readme",
+  "homepage": "https://github.com/KnightHacks/dispatch#readme",
   "devDependencies": {
     "@babel/core": "^7.14.6",
     "@babel/preset-env": "^7.14.7",
