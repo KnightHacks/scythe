@@ -10,5 +10,4 @@ export default class MessageDispatcher implements Dispatchable {
     const command = this.manager.lookup(interaction.commandName);
     await command?.run(interaction);
   }
-}
-  
+} 
