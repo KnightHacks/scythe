@@ -8,7 +8,7 @@ import Command from './command';
  * @returns true if it's a true instance of Command, false otherwise.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isCommandType(command: any): boolean {
+function isCommandType(command: any): command is Command {
   // Iterate through required command properties
   const requiredProps = ['name', 'run'];
 
@@ -62,7 +62,7 @@ export const CommandLoader = {
         throw new Error(`Cannot instantiate from file: ${command}, it doesn't implement the Command interface.`);
       }
 
-      return command as Command;
+      return command;
     }));
   },
 };
