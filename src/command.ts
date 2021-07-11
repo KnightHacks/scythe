@@ -24,6 +24,11 @@ export default interface Command {
  * @returns true if it's a true instance of Command, false otherwise.
  */
 export function isCommand(maybeCommand: unknown): maybeCommand is Command {
+  // if we're not an object, property accesses will throw
+  if (typeof maybeCommand !== 'object') {
+    return false;
+  }
+
   // Iterate through required command properties
   const requiredProps = ['name', 'run'];
 
