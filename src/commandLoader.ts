@@ -4,17 +4,17 @@ import Command from './command';
 
 /**
  * Emulates instanceof check for Command types.
- * @param command The denormalized command type to check.
+ * @param maybeCommand The denormalized command type to check.
  * @returns true if it's a true instance of Command, false otherwise.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isCommandType(command: any): command is Command {
+function isCommandType(maybeCommand: any): maybeCommand is Command {
   // Iterate through required command properties
   const requiredProps = ['name', 'run'];
 
   let retVal = true;
   requiredProps.forEach((prop) => {
-    if (!(prop in command)) {
+    if (!(prop in maybeCommand)) {
       retVal = false;
     }
   });
