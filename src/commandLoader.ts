@@ -3,7 +3,7 @@ import path from 'path';
 import Command from './command';
 
 /**
- * Emulates instanceof check for Command types.
+ * Returns whether an object of unknown type is a Command.
  * @param maybeCommand The denormalized command type to check.
  * @returns true if it's a true instance of Command, false otherwise.
  */
