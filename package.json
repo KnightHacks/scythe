@@ -2,7 +2,7 @@
   "name": "dispatch",
   "version": "1.0.1",
   "description": "A template for running typescript on the nodejs platform",
-  "types": "src/typings/index",
+  "types": "src/typings/index.d.ts",
   "scripts": {
     "build": "tsc",
     "start": "npm start:dev",
