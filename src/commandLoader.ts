@@ -27,7 +27,7 @@ export const CommandLoader = {
       const importPath = path.join(dir, file);
 
       // Dynamically import command file.
-      const { default: command } = await import(importPath).catch((err) => {
+      const { default: command }: { default: unknown } = await import(importPath).catch((err) => {
         console.log(err);
         throw new Error(`Could not load command from file: ${file}`);
       });

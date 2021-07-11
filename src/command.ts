@@ -23,14 +23,13 @@ export default interface Command {
  * @param maybeCommand The denormalized command type to check.
  * @returns true if it's a true instance of Command, false otherwise.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isCommand(maybeCommand: any): maybeCommand is Command {
+export function isCommand(maybeCommand: unknown): maybeCommand is Command {
   // Iterate through required command properties
   const requiredProps = ['name', 'run'];
 
   let retVal = true;
   requiredProps.forEach((prop) => {
-    if (!(prop in maybeCommand)) {
+    if (!(prop in (maybeCommand as Command))) {
       retVal = false;
     }
   });
