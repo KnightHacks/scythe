@@ -13,4 +13,12 @@ export default class CommandManager {
   public register(command: Command): Map<string, Command> {
     return this.commandMap.set(command.name, command);
   }
+
+  public lookup(name: string): Command | undefined {
+    return this.commandMap.get(name);
+  }
+
+  public get all(): Command[] {
+    return [...this.commandMap.values()];
+  }
 }

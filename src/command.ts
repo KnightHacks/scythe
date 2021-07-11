@@ -7,6 +7,11 @@ export default interface Command {
   get name(): string;
 
   /**
+   * The description of the command.
+   */
+  get description(): string;
+
+  /**
    * The function that gets executed after the command
    * is invoked.
    */

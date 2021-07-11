@@ -1,9 +1,11 @@
+import { CommandInteraction } from 'discord.js';
 import Command from '../command';
 
 const command: Command = {
   name: 'test',
-  run(): void {
-    console.log('test');
+  description: 'a test command',
+  async run(interaction: CommandInteraction): Promise<void> {
+    await interaction.reply('Hello from dispatch');
   }
 };
 
