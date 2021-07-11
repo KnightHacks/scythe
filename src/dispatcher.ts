@@ -1,5 +1,4 @@
-import { CommandInteraction, Interaction } from 'discord.js';
-import CommandManager from './commandManager';
+import { Interaction } from 'discord.js';
 
 export default interface Dispatchable {
   dispatch(interaction: Interaction): void;
