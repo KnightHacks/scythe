@@ -10,7 +10,7 @@ export default class Client extends discord.Client {
    * Handles commands for the bot.
    */
   public readonly commands: CommandManager;
-  public readonly commandDispatch: MessageDispatcher;
+  private readonly commandDispatch: MessageDispatcher;
 
   constructor(options: ClientOptions) {
     super(options);

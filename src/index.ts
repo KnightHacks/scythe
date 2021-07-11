@@ -10,7 +10,7 @@ dotenv.config();
   const client = new Client({intents: ['GUILDS', 'GUILD_MESSAGES']});
 
   // Load commands in.
-  client.registerCommands(path.join(__dirname, 'commands'));
+  await client.registerCommands(path.join(__dirname, 'commands'));
 
   // Start up client.
   await client.login(process.env.DISCORD_TOKEN);
