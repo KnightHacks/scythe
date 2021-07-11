@@ -1,4 +1,4 @@
-# node-typescript-template
+# Dispatch
 
 ## Available Scripts
 
