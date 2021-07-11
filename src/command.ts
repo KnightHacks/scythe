@@ -1,4 +1,4 @@
-import { CommandInteraction } from 'discord.js';
+import { ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
 
 export default interface Command {
   /**
@@ -10,6 +10,11 @@ export default interface Command {
    * The description of the command.
    */
   get description(): string;
+
+  /**
+   * The options available for this command.
+   */
+  options?: ApplicationCommandOptionData[];
 
   /**
    * The function that gets executed after the command

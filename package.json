@@ -5,8 +5,8 @@
   "main": "src/index.ts",
   "scripts": {
     "build": "tsc",
-    "start:dev": "ts-node --files ./src/index.ts",
-    "start:prod": "tsc && node ./dist/index.js",
+    "start:dev": "NODE_ENV=development ts-node --files ./src/index.ts",
+    "start:prod": "NODE_ENV=development tsc && node ./dist/index.js",
     "test": "jest ./src",
     "lint": "eslint ./src"
   },

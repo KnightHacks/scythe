@@ -2,7 +2,6 @@ import discord, { ClientOptions, CommandInteraction } from 'discord.js';
 import MessageDispatcher from './commandDispatch';
 import { CommandLoader } from './commandLoader';
 import CommandManager from './commandManager';
-import { normalizeCommand } from './util';
 
 export default class Client extends discord.Client {
 
@@ -19,11 +18,18 @@ export default class Client extends discord.Client {
 
     // Register commands on connection
     this.once('ready', async () => {
-      if (process.env.GUILD_ID) {
-        const guild = this.guilds.cache.get(process.env.GUILD_ID);
-        const jsonCommands = this.commands.all.map(normalizeCommand);
 
-        await guild?.commands.set(jsonCommands);
+      // Convert commands.
+      const appCommands = this.commands.toAppCommands();
+
+      // Guild commands propogate instantly, but application commands do not
+      // so we only want to use guild commands when in development.
+      if (process.env.NODE_ENV === 'development' && process.env.GUILD_ID) {
+        console.log('Development environment detected, using guild commands instead of application commands.');
+        const guild = this.guilds.cache.get(process.env.GUILD_ID);
+        await guild?.commands.set(appCommands);
+      } else {
+        await this.application?.commands.set(appCommands);
       }
     });
 

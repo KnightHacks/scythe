@@ -1,4 +1,4 @@
-import { Client } from 'discord.js';
+import { ApplicationCommandData, Client } from 'discord.js';
 import Command from './command';
 
 export default class CommandManager {
@@ -14,11 +14,24 @@ export default class CommandManager {
     return this.commandMap.set(command.name, command);
   }
 
+  /**
+   * Looks up the command given the command name.
+   * @param name The name of the command to lookup
+   * @returns The command if found, undefined otherwise.
+   */
   public lookup(name: string): Command | undefined {
     return this.commandMap.get(name);
   }
 
-  public get all(): Command[] {
-    return [...this.commandMap.values()];
+  /**
+   * Converts the registered commands to an array of {@link ApplicationCommandData}.
+   * @returns An array of commands normalized to {@link ApplicationCommandData}.
+   */
+  public toAppCommands(): ApplicationCommandData[] {
+    return [...this.commandMap.values()].map(command => ({ 
+      name: command.name,
+      options: command.options,
+      description: command.description 
+    }));
   }
 }
