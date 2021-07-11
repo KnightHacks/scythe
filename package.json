@@ -43,5 +43,5 @@
     "discord.js": "^13.0.0-dev.d6c43a5.1625918569",
     "dotenv": "^10.0.0"
   },
-  "files": ["dist"]
+  "files": ["/dist"]
 }
