@@ -3,7 +3,7 @@
   "version": "1.0.1",
   "type": "commonjs",
   "description": "A template for running typescript on the nodejs platform",
-  "types": "./dist/typings/index.d.ts",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "start": "npm start:dev",
@@ -43,5 +43,7 @@
     "discord.js": "^13.0.0-dev.d6c43a5.1625918569",
     "dotenv": "^10.0.0"
   },
-  "files": ["/dist"]
+  "files": [
+    "/dist"
+  ]
 }
