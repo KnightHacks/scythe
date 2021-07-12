@@ -38,8 +38,4 @@ export default class CommandManager {
       description: command.description,
     }));
   }
-
-  public get all(): Command[] {
-    return [...this.commandMap.values()];
-  }
 }
