@@ -23,7 +23,9 @@ export default interface Command {
   run(interaction: CommandInteraction): Promise<void> | void;
 
   /**
-   * The channel ID's that this command is allowed in.
+   * The channel IDs that this command is allowed in.
+   * If a value is not provided this command is allowed to be
+   * used in any channel.
    */
   allowedChannels?: Snowflake[];
 }
