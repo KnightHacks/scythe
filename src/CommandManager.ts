@@ -1,5 +1,5 @@
 import { ApplicationCommandData, Client } from 'discord.js';
-import Command from './command';
+import Command from './Command';
 
 export default class CommandManager {
   private readonly commandMap = new Map<string, Command>();
@@ -28,10 +28,10 @@ export default class CommandManager {
    * @returns An array of commands normalized to {@link ApplicationCommandData}.
    */
   public toAppCommands(): ApplicationCommandData[] {
-    return [...this.commandMap.values()].map(command => ({ 
+    return [...this.commandMap.values()].map((command) => ({
       name: command.name,
       options: command.options,
-      description: command.description 
+      description: command.description,
     }));
   }
 }
