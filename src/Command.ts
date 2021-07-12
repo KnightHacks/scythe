@@ -1,4 +1,8 @@
-import { ApplicationCommandOptionData, CommandInteraction } from 'discord.js';
+import {
+  ApplicationCommandOptionData,
+  CommandInteraction,
+  Snowflake,
+} from 'discord.js';
 
 export default interface Command {
   /**
@@ -21,6 +25,13 @@ export default interface Command {
    * is invoked.
    */
   run(interaction: CommandInteraction): Promise<void> | void;
+
+  /**
+   * The channel IDs that this command is allowed in.
+   * If a value is not provided, this command is allowed to be
+   * used in any channel.
+   */
+  allowedChannels?: Snowflake[];
 }
 
 /**
