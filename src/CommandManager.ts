@@ -13,7 +13,7 @@ export default class CommandManager {
    */
   public register(command: Command): Map<string, Command> {
     // Add in button listeners.
-    command.buttonListener.listeners
+    command.buttonListener?.listeners
       .forEach((handler, id) => this.client.addButtonListener(id, handler));
     return this.commandMap.set(command.name, command);
   }

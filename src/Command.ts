@@ -34,7 +34,7 @@ export default interface Command {
    */
   allowedChannels?: Snowflake[];
 
-  buttonListener: ButtonListener;
+  buttonListener?: ButtonListener;
 }
 
 /**
