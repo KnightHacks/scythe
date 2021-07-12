@@ -2,7 +2,7 @@
   "name": "dispatch",
   "version": "1.0.1",
   "type": "commonjs",
-  "description": "A template for running typescript on the nodejs platform",
+  "description": "A command-driven discord.js addon",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
@@ -46,6 +46,7 @@
     "dotenv": "^10.0.0"
   },
   "files": [
-    "/dist"
+    "/dist",
+    "/src"
   ]
 }
