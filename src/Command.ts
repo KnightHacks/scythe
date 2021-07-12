@@ -28,7 +28,6 @@ export default interface Command {
   allowedChannels?: Snowflake[];
 }
 
-
 /**
  * Returns whether an object of unknown type is a Command.
  * @param maybeCommand The denormalized command type to check.
