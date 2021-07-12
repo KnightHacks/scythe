@@ -11,7 +11,8 @@
     "start:dev": "NODE_ENV=development nodemon --exec ts-node --files ./src/index.ts",
     "start:prod": "NODE_ENV=development tsc && node ./dist/index.js",
     "test": "jest ./src",
-    "lint": "eslint ./src"
+    "lint": "eslint ./src",
+    "postinstall": "tsc"
   },
   "repository": {
     "type": "git",
