@@ -3,6 +3,7 @@
   "version": "1.0.1",
   "type": "commonjs",
   "description": "A template for running typescript on the nodejs platform",
+  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc",
