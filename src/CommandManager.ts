@@ -1,4 +1,5 @@
-import { ApplicationCommandData, Client } from 'discord.js';
+import { ApplicationCommandData } from 'discord.js';
+import Client from './Client';
 import Command from './Command';
 
 export default class CommandManager {
@@ -11,6 +12,9 @@ export default class CommandManager {
    * @param command The command to register.
    */
   public register(command: Command): Map<string, Command> {
+    // Add in button listeners.
+    command.buttonListener?.listeners
+      .forEach((handler, id) => this.client.addButtonListener(id, handler));
     return this.commandMap.set(command.name, command);
   }
 

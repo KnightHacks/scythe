@@ -3,6 +3,7 @@ import {
   CommandInteraction,
   Snowflake,
 } from 'discord.js';
+import { ButtonListener } from './ButtonListener';
 
 export default interface Command {
   /**
@@ -32,6 +33,8 @@ export default interface Command {
    * used in any channel.
    */
   allowedChannels?: Snowflake[];
+
+  buttonListener?: ButtonListener;
 }
 
 /**

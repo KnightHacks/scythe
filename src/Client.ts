@@ -1,7 +1,8 @@
-import discord, { ClientOptions, CommandInteraction } from 'discord.js';
+import discord, { ButtonInteraction, ClientOptions, CommandInteraction } from 'discord.js';
 import MessageDispatcher from './MessageDispatcher';
 import { CommandLoader } from './CommandLoader';
 import CommandManager from './CommandManager';
+import { ButtonHandler } from './ButtonListener';
 
 export default class Client extends discord.Client {
   /**
@@ -9,6 +10,7 @@ export default class Client extends discord.Client {
    */
   public readonly commands: CommandManager;
   private readonly commandDispatch: MessageDispatcher;
+  private readonly buttonListeners: Map<string, ButtonHandler> = new Map(); 
 
   constructor(options: ClientOptions) {
     super(options);
@@ -35,11 +37,21 @@ export default class Client extends discord.Client {
 
     // Enable dispatcher.
     this.on('interactionCreate', (interaction) => {
-      if (!(interaction instanceof CommandInteraction)) {
-        return;
+      if (interaction instanceof CommandInteraction) {
+        this.commandDispatch.dispatch(interaction);
       }
 
-      this.commandDispatch.dispatch(interaction);
+      if (interaction instanceof ButtonInteraction) {
+        const handler = this.buttonListeners.get(interaction.customId);
+
+        if (!handler) {
+          return;
+        }
+
+        // Run handler.
+        handler(interaction);
+      }
+      
     });
   }
 
@@ -53,5 +65,9 @@ export default class Client extends discord.Client {
 
     // Register all commands.
     commands.forEach((command) => this.commands.register(command));
+  }
+
+  public addButtonListener(interactionID: string, handler: ButtonHandler): void {
+    this.buttonListeners.set(interactionID, handler);
   }
 }
