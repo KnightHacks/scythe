@@ -32,6 +32,12 @@ export default interface Command {
    * used in any channel.
    */
   allowedChannels?: Snowflake[];
+
+  /**
+   * An array of role IDs that are allowed to use this {@link Command}. If a
+   * value is not provided, any role will be allowed to use the command.
+   */
+  allowedRoles?: Snowflake[];
 }
 
 /**
