@@ -1,6 +1,6 @@
 {
-  "name": "dispatch",
-  "version": "1.0.1",
+  "name": "@knighthacks/dispatch",
+  "version": "1.0.0-dev",
   "type": "commonjs",
   "description": "A command-driven discord.js addon",
   "main": "./dist/index.js",
@@ -11,12 +11,11 @@
     "start:dev": "NODE_ENV=development nodemon --exec ts-node --files ./src/index.ts",
     "start:prod": "NODE_ENV=development tsc && node ./dist/index.js",
     "test": "jest ./src",
-    "lint": "eslint ./src",
-    "prepare": "npm run build"
+    "lint": "eslint ./src"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/KnightHacks/dispatch.git"
+    "url": "git://github.com/KnightHacks/dispatch.git"
   },
   "author": "Suneet Tipirneni",
   "license": "MIT",
@@ -34,6 +33,7 @@
     "@typescript-eslint/eslint-plugin": "^4.28.2",
     "@typescript-eslint/parser": "^4.28.2",
     "babel-jest": "^27.0.6",
+    "discord.js": "github:discordjs/discord.js",
     "eslint": "^7.30.0",
     "jest": "^27.0.6",
     "nodemon": "^2.0.12",
@@ -42,11 +42,9 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "discord.js": "github:discordjs/discord.js",
     "dotenv": "^10.0.0"
   },
   "files": [
-    "/dist",
-    "/src"
+    "/dist"
   ]
 }
