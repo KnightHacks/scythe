@@ -1,10 +1,5 @@
 import {
-  CommandInteraction,
-  GuildMemberRoleManager,
-  RoleManager,
-  Snowflake,
-  Role,
-  MessagePayload,
+  CommandInteraction, GuildMember
 } from 'discord.js';
 import CommandManager from './CommandManager';
 import Dispatchable from './Dispatchable';
@@ -35,67 +30,38 @@ export default class MessageDispatcher implements Dispatchable {
       }
     }
 
-    // Check role permissions
-    const allowedRoles = command.allowedRoles;
-    if (allowedRoles) {
-      const userRoles = getUserRoles(interaction);
-      if (userRoles === null) {
-        interaction.reply({
-          content: 'There was a problem checking user permissions!',
-          ephemeral: true,
-        });
+    // Check allowed roles.
+    if (command.allowedRoles) {
+      let allowedRole = true;
+      const { member } = interaction;
+
+      // If there's no member associated this is not a normal message.
+      if (!member) {
         return;
+      }
+
+      // Iterate and check if roles are present.
+      if (member instanceof GuildMember) {
+        command.allowedRoles?.forEach(roleID => {
+          allowedRole = member.roles.cache.find(role => role.id === roleID) !== undefined;
+        });
       } else {
-        const isAllowed = userRoles.reduce((acc: boolean, cur: Snowflake) => {
-          return acc || allowedRoles.includes(cur);
-        }, false);
-        if (!isAllowed) {
-          const guild = interaction.guild;
-          if (guild === null) {
-            interaction.reply({
-              content: 'There was a problem fetching the guild!',
-              ephemeral: true,
-            });
-            return;
-          }
-          const roleManager = new RoleManager(guild);
-          const roles: Role[] = allowedRoles
-            .map(roleManager.resolve)
-            .filter(isNonNull);
-          const errorMessage =
-            `Sorry, you don't have permission to run \`/${command.name}\` ` +
-            `Allowed roles include: ${allowedRoles}`;
-          const reply = new MessagePayload(interaction, {
-            content: errorMessage,
-            allowedMentions: {
-              users: [],
-            },
-          });
-          interaction.reply({
-            content: errorMessage,
-            ephemeral: true,
-          });
-          return;
-        }
+        command.allowedRoles?.forEach(roleID => {
+          allowedRole = member.roles.includes(roleID);
+        });
+      }
+    
+      // Send error if roles could not be found on user.
+      if (!allowedRole) {
+        const errMsg =
+      'You must have to following roles to run this command:\n'.concat(
+        ...command.allowedRoles.map((role) => `- <@&${role}>\n`)
+      );
+        interaction.reply({ content: errMsg, ephemeral: true });
+        return;
       }
     }
 
     await command.run(interaction);
   }
-}
-
-function getUserRoles(interaction: CommandInteraction): Snowflake[] | null {
-  const roleManagerOrSnowFlakes = interaction.member?.roles;
-  if (roleManagerOrSnowFlakes === undefined) {
-    return null;
-  } else if (roleManagerOrSnowFlakes instanceof GuildMemberRoleManager) {
-    const userRoles: Snowflake[] = [...roleManagerOrSnowFlakes.cache.keys()];
-    return userRoles;
-  } else {
-    return roleManagerOrSnowFlakes;
-  }
-}
-
-function isNonNull<T>(thing: T | null): thing is T {
-  return thing !== null;
 }
