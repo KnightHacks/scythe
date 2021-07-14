@@ -34,7 +34,7 @@ export default class MessageDispatcher implements Dispatchable {
     if (command.allowedRoles) {
       if (!hasRoles(command.allowedRoles, interaction.member)) {
         const errMsg =
-      'You must have to following roles to run this command:\n'.concat(
+      'You must have one of the following roles to run this command:\n'.concat(
         ...command.allowedRoles.map((role) => `- <@&${role}>\n`)
       );
         interaction.reply({ content: errMsg, ephemeral: true });
