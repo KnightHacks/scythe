@@ -5,7 +5,7 @@ type GuildMemberType = Interaction['member'];
 
 /**
  * Checks if the given guild member has roles.
- * @param roles The roles ID's to check for.
+ * @param roles The roles IDs to check for.
  * @param member The member to check against
  * @returns true if the roles are present, false otherwise.
  */
@@ -29,7 +29,7 @@ export function hasRoles(roles: Snowflake[], member: GuildMemberType): boolean {
 
 /**
  * Checks if the given interaction is used within the given channels.
- * @param channels The channel ID's to check for.
+ * @param channels The channel IDs to check for.
  * @param interaction The interaction to check against.
  * @returns true if the interaction was in one of the given channels, false otherwise.
  */
