@@ -20,7 +20,7 @@ export function hasRoles(roles: Snowflake[], member: GuildMemberType): boolean {
     allowed = !roles.some(roleID => member.roles.cache.find(role => role.id === roleID) === undefined);
   } else {
     roles.forEach(roleID => {
-      allowed = member.roles.includes(roleID);
+      allowed &&= member.roles.includes(roleID);
     });
   }
 
