@@ -3,7 +3,6 @@ import {
   CommandInteraction,
   Snowflake,
 } from 'discord.js';
-import { ButtonListener } from './ButtonListener';
 
 export default interface Command {
   /**
@@ -39,7 +38,6 @@ export default interface Command {
    * value is not provided, any role will be allowed to use the command.
    */
   allowedRoles?: Snowflake[];
-  buttonListener?: ButtonListener;
 }
 
 /**
