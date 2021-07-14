@@ -1,6 +1,6 @@
 {
   "name": "@knighthacks/dispatch",
-  "version": "1.0.0-dev",
+  "version": "0.1.0-dev",
   "type": "commonjs",
   "description": "A command-driven discord.js addon",
   "main": "./dist/index.js",
