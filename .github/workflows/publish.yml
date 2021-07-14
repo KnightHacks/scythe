@@ -18,6 +18,7 @@ jobs:
           # Defaults to the user or organization that owns the workflow file
           scope: '@KnightHacks'
       - run: npm install
+      - run: npm run build
       - run: npm version --git-tag-version=false $(jq --raw-output '.version' package.json)-$(git rev-parse --short HEAD)
       - run: npm publish
         env:
