@@ -9,16 +9,20 @@ export type Button = MessageButtonOptions & {
 export function toComponents(client: Client, buttons: Button[][]): MessageActionRow[] {
   const configInRows: MessageButtonOptions[][] = buttons.map((row) =>
     row.map((button) => {
-      const id = getButtonID();
-      const copy: MessageButtonOptions & { onClick?: ButtonHandler } = {
-        customId: id,
-        ...button,
-      };
-      if (copy.onClick) {
-        client.addButtonListener(id, copy.onClick);
+      if (!button.customId) {
+        const id = getButtonID();
+        const copy: MessageButtonOptions & { onClick?: ButtonHandler } = {
+          customId: id,
+          ...button,
+        };
+        if (copy.onClick) {
+          client.addButtonListener(id, copy.onClick);
+        }
+        delete copy.onClick;
+        return copy;
+      } else {
+        return button;
       }
-      delete copy.onClick;
-      return copy;
     })
   );
   return configInRows.map((row) => new MessageActionRow().addComponents(row));
