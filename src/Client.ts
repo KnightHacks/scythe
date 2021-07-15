@@ -1,6 +1,6 @@
 import discord, { ApplicationCommandData, ButtonInteraction, ClientOptions, CommandInteraction } from 'discord.js';
 import MessageDispatcher from './MessageDispatcher';
-import { CommandLoader } from './CommandLoader';
+import { loadCommands } from './loadCommands';
 import CommandManager from './CommandManager';
 import { ButtonHandler } from './ButtonListener';
 
@@ -43,7 +43,7 @@ export default class Client extends discord.Client {
    */
   public async registerCommands(dir: string): Promise<void> {
     // Load all of the commands in.
-    const commands = await CommandLoader.loadCommands(dir);
+    const commands = await loadCommands(dir);
 
     // Register all commands.
     commands.forEach((command) => this.commands.register(command));
