@@ -1,12 +1,14 @@
 import {
   ApplicationCommandOptionData,
   CommandInteraction,
-  Snowflake,
 } from 'discord.js';
 import { ButtonListener } from './ButtonListener';
 
 export type PermissionHandler = (interaction: CommandInteraction) => boolean | Promise<boolean>;
 
+/**
+ * Represents a the blueprint for a slash commands.
+ */
 export default interface Command {
   /**
    * The name of the command.
@@ -21,26 +23,19 @@ export default interface Command {
   /**
    * The options available for this command.
    */
-  options?: ApplicationCommandOptionData[];
+  readonly options?: ApplicationCommandOptionData[];
 
   /**
    * The function that gets executed after the command
    * is invoked.
    */
   run(interaction: CommandInteraction): Promise<void> | void;
-
-  /**
-   * The channel IDs that this command is allowed in.
-   * If a value is not provided, this command is allowed to be
-   * used in any channel.
-   */
-  allowedChannels?: Snowflake[];
-  buttonListener?: ButtonListener;
+  readonly buttonListener?: ButtonListener;
 
   /**
    * The {@link PermissionHandler} that handles the permissions for this command.
    */
-  permissions?: PermissionHandler;
+  readonly permissions?: PermissionHandler;
 }
 
 /**
