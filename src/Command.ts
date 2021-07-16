@@ -5,6 +5,8 @@ import {
 } from 'discord.js';
 import { ButtonListener } from './ButtonListener';
 
+export type PermissionHandler = (interaction: CommandInteraction) => boolean | Promise<boolean>;
+
 export default interface Command {
   /**
    * The name of the command.
@@ -33,13 +35,12 @@ export default interface Command {
    * used in any channel.
    */
   allowedChannels?: Snowflake[];
+  buttonListener?: ButtonListener;
 
   /**
-   * An array of role IDs that are allowed to use this {@link Command}. If a
-   * value is not provided, any role will be allowed to use the command.
+   * The {@link PermissionHandler} that handles the permissions for this command.
    */
-  allowedRoles?: Snowflake[];
-  buttonListener?: ButtonListener;
+  permissions?: PermissionHandler;
 }
 
 /**
