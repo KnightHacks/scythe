@@ -1,4 +1,4 @@
-import { CommandInteraction, GuildMember, TextChannel } from 'discord.js';
+import { Guild, GuildMember, Snowflake, TextChannel } from 'discord.js';
 import { PermissionHandler } from './Command';
 
 /**
@@ -26,27 +26,22 @@ export function checkAll(...handlers: PermissionHandler[]): PermissionHandler {
  * @param roles The roles to check for.
  * @returns A permission handler function.
  */
-export function hasRoles(...roles: string[]): PermissionHandler {
-  return async function check(interaction: CommandInteraction): Promise<boolean> {
+export function allRoles(...roles: string[]): PermissionHandler {
+  return async (interaction) => {
     let allowed = true;
     const member = interaction.member as GuildMember;
     if (!member) {
       return false;
     }
 
-    // Iterate and check if roles are present.
-    const roleIDs = roles.map(roleName => interaction.guild?.roles.cache.find(role => {
-      return role.name === roleName;
-    }));
+    roles.forEach(roleName => allowed &&= member.roles.cache.some(role => role.name === roleName));
 
-    roleIDs.forEach(role => {
-      allowed &&= member.roles.cache.find(curRole => curRole.id === role?.id) !== undefined;
-    });
-  
+    // Iterate and check if roles are present.
     if (!allowed) {
+      const roleIDs = roles.map((role) => resolveRoleID(interaction.guild, role));
       const errMsg =
-        'You must have one of the following roles to run this command:\n'.concat(
-          ...roleIDs.map((role) => `- ${role}\n`)
+        'You must have the following roles to run this command:\n'.concat(
+          ...roleIDs.map((role) => `- <@&${role}>\n`)
         );
       await interaction.reply({ content: errMsg, ephemeral: true });
     }
@@ -56,32 +51,69 @@ export function hasRoles(...roles: string[]): PermissionHandler {
 }
 
 /**
- * A helper function to check if the interaction was sent in the given channel(s).
- * @param roles The channels to check for.
+ * A helper function to check if the sender has one of the given roles.
+ * @param roles The roles to check for.
  * @returns A permission handler function.
  */
-export function checkChannels(...channelNames: string[]): PermissionHandler {
-  return async (interaction: CommandInteraction): Promise<boolean> => {
+export function oneOfRoles(...roles: string[]): PermissionHandler {
+  return async (interaction) => {
+    const member = interaction.member as GuildMember;
+    const allowed =  roles.some(roleName => member.roles.cache.find(role => role.name === roleName));
+
+    if (!allowed) {
+      const roleIDs = roles.map((role) => resolveRoleID(interaction.guild, role));
+      const errMsg =
+        'You must have one of the following roles to run this command:\n'.concat(
+          ...roleIDs.map((role) => `- <@&${role}>\n`)
+        );
+      await interaction.reply({ content: errMsg, ephemeral: true });
+    }
+
+    return allowed;
+  };
+}
+
+/**
+ * A helper function to check if the interaction was sent in the given channel(s).
+ * @param channels The channels to check for.
+ * @returns A permission handler function.
+ */
+export function inChannels(...channels: string[]): PermissionHandler {
+  return async (interaction) => {
     // Resolve each of the channel names
-    const channels = channelNames.map(channelName => interaction.client.channels.cache.find(channel => (<TextChannel>channel).name === channelName)?.id);
-    if (!channels || !interaction.channel) {
+    const channelIDs = channels.map(channelName => interaction.client.channels.cache.find(channel => (<TextChannel>channel).name === channelName)?.id);
+    if (!channelIDs || !interaction.channel) {
       console.log('No channels were found');
       return false;
     }
   
-    const valid = channels.includes(interaction.channelId);
+    const valid = channelIDs.includes(interaction.channelId);
       
     if (!valid) {
       const errMsg =
             'Please use this command in an allowed channel:\n'.concat(
-              ...channels.map((channel) => `- <#${channel}>\n`)
+              ...channelIDs.map((channel) => `- <#${channel}>\n`)
             );
-        
-      console.log('got here');    
+         
       // Send error message.
       await interaction.reply({ content: errMsg, ephemeral: true });
     }
   
     return valid;
   };
+}
+
+function resolveRoleID(guild: Guild | null, roleName: string): Snowflake {
+
+  if (!guild) {
+    throw new Error('Could not find guild');
+  }
+
+  const retVal = guild.roles.cache.find(role => role.name === roleName);
+
+  if (!retVal) {
+    throw new Error(`Could not resolve role '${roleName} to an ID.'`);
+  }
+
+  return retVal.id;
 }

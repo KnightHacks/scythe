@@ -19,6 +19,12 @@ export default class MessageDispatcher implements Dispatchable {
     if (command.permissions) {
       const check = await command.permissions(interaction);
       if (!check) {
+        // It's not gauranted that an interaction will be responded to,
+        // by the permission handlers, if it isn't, provide a default 
+        // error message, so the interaction is acknowledged.
+        if (!interaction.replied) {
+          interaction.reply({ content: 'You do not have permission to execute this command.', ephemeral: true });
+        }
         return;
       }
     }
