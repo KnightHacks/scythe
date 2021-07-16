@@ -1,4 +1,4 @@
-import { Guild, GuildMember, Snowflake, TextChannel } from 'discord.js';
+import { Guild, GuildMember, Snowflake, TextChannel, ThreadChannel } from 'discord.js';
 import { PermissionHandler } from './Command';
 
 /**
@@ -38,6 +38,7 @@ export function allRoles(...roles: string[]): PermissionHandler {
 
     // Iterate and check if roles are present.
     if (!allowed) {
+    
       const roleIDs = roles.map((role) => resolveRoleID(interaction.guild, role));
       const errMsg =
         'You must have the following roles to run this command:\n'.concat(
@@ -81,7 +82,7 @@ export function oneOfRoles(...roles: string[]): PermissionHandler {
 export function inChannels(...channels: string[]): PermissionHandler {
   return async (interaction) => {
     // Resolve each of the channel names
-    const channelIDs = channels.map(channelName => interaction.client.channels.cache.find(channel => (<TextChannel>channel).name === channelName)?.id);
+    const channelIDs = channels.map(channelName => interaction.client.channels.cache.find(channel => (<TextChannel | ThreadChannel>channel).name === channelName)?.id);
     if (!channelIDs || !interaction.channel) {
       console.log('No channels were found');
       return false;
@@ -100,6 +101,33 @@ export function inChannels(...channels: string[]): PermissionHandler {
     }
   
     return valid;
+  };
+}
+
+/**
+ * Checks if a given interaction is created in an allowed category.
+ * @param categories The categories to check for
+ * @returns A permission handler.
+ */
+export function inCategories(...categories: string[]): PermissionHandler {
+  return async (interaction) => {
+    if (!(interaction.channel instanceof TextChannel)) {
+      return false;
+    }
+
+    const category = interaction.channel.parent?.name;
+    if (!category) {
+      return false;
+    }
+
+    const allowed = categories.includes(category);
+
+    if (!allowed) {
+      const content = 'Please use the command in the following categories:\n'.concat(...categories.map(cur => `- ${cur}\n`));
+      await interaction.reply({ content, ephemeral: true });
+    }
+
+    return allowed;
   };
 }
 
