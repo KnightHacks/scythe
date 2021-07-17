@@ -33,13 +33,16 @@
     "@typescript-eslint/eslint-plugin": "^4.28.2",
     "@typescript-eslint/parser": "^4.28.2",
     "babel-jest": "^27.0.6",
-    "discord.js": "^13.0.0-dev.98c6078.1626221017",
+    "discord.js": "^13.0.0-dev.4206e35.1626350625",
     "eslint": "^7.30.0",
     "jest": "^27.0.6",
     "nodemon": "^2.0.12",
     "ts-jest": "^27.0.3",
     "ts-node": "^10.1.0",
     "typescript": "^4.3.5"
+  },
+  "peerDependencies": {
+    "discord.js": "13.x"
   },
   "dependencies": {
     "dotenv": "^10.0.0"
