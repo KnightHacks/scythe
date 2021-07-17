@@ -1,4 +1,4 @@
-import discord, { ApplicationCommandData, ButtonInteraction, ClientOptions, CommandInteraction } from 'discord.js';
+import discord, { ApplicationCommandData, ButtonInteraction, ClientOptions, CommandInteraction, Guild } from 'discord.js';
 import MessageDispatcher from './MessageDispatcher';
 import { loadCommands } from './loadCommands';
 import CommandManager from './CommandManager';
@@ -61,17 +61,23 @@ export default class Client extends discord.Client {
   }
 
   private async pushCommands(commands: ApplicationCommandData[]) {
+    let guild: Guild | undefined = undefined;
+    if (process.env.GUILD_ID) {
+      guild = this.guilds.cache.get(process.env.GUILD_ID);
+    }
+
     // Guild commands propogate instantly, but application commands do not
     // so we only want to use guild commands when in development.
-    if (process.env.NODE_ENV === 'development' && process.env.GUILD_ID) {
+    if (process.env.NODE_ENV === 'development') {
       console.log(
         'Development environment detected..., using guild commands instead of application commands.'
       );
-      const guild = this.guilds.cache.get(process.env.GUILD_ID);
       // Clear app commands
       await this.application?.commands.set([]);
       await guild?.commands.set(commands);
     } else {
+      // Clear guild commands
+      await guild?.commands.set([]);
       await this.application?.commands.set(commands);
     }
   }
