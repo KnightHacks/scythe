@@ -29,6 +29,7 @@ export function checkAll(...handlers: PermissionHandler[]): PermissionHandler {
 export function allRoles(...roles: string[]): PermissionHandler {
   return async (interaction) => {
     let allowed = true;
+    // FIXME is this cast safe?
     const member = interaction.member as GuildMember;
     if (!member) {
       return false;
@@ -58,6 +59,7 @@ export function allRoles(...roles: string[]): PermissionHandler {
  */
 export function oneOfRoles(...roles: string[]): PermissionHandler {
   return async (interaction) => {
+    // FIXME is this cast safe?
     const member = interaction.member as GuildMember;
     const allowed =  roles.some(roleName => member.roles.cache.find(role => role.name === roleName));
 
