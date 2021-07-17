@@ -39,8 +39,12 @@ export function allRoles(...roles: string[]): PermissionHandler {
 
     // Iterate and check if roles are present.
     if (!allowed) {
-    
-      const roleIDs = roles.map((role) => resolveRoleID(interaction.guild, role));
+      const guild = interaction.guild;
+      if (!guild) {
+        console.log(new Error('Could not find guild'));
+        return false;
+      }
+      const roleIDs = roles.map((role) => resolveRoleID(guild, role));
       const errMsg =
         'You must have the following roles to run this command:\n'.concat(
           ...roleIDs.map((role) => `- <@&${role}>\n`)
@@ -64,7 +68,12 @@ export function oneOfRoles(...roles: string[]): PermissionHandler {
     const allowed =  roles.some(roleName => member.roles.cache.find(role => role.name === roleName));
 
     if (!allowed) {
-      const roleIDs = roles.map((role) => resolveRoleID(interaction.guild, role));
+      const guild = interaction.guild;
+      if (!guild) {
+        console.log(new Error('Could not find guild!'));
+        return false;
+      }
+      const roleIDs = roles.map((role) => resolveRoleID(guild, role));
       const errMsg =
         'You must have one of the following roles to run this command:\n'.concat(
           ...roleIDs.map((role) => `- <@&${role}>\n`)
@@ -86,7 +95,7 @@ export function inChannels(...channels: string[]): PermissionHandler {
     // Resolve each of the channel names
     const channelIDs = channels.map(channelName => interaction.client.channels.cache.find(channel => (<TextChannel | ThreadChannel>channel).name === channelName)?.id);
     if (!channelIDs || !interaction.channel) {
-      console.log('No channels were found');
+      console.log('No channels were found!');
       return false;
     }
   
@@ -133,17 +142,12 @@ export function inCategories(...categories: string[]): PermissionHandler {
   };
 }
 
-function resolveRoleID(guild: Guild | null, roleName: string): Snowflake {
-
-  if (!guild) {
-    throw new Error('Could not find guild');
-  }
-
+function resolveRoleID(guild: Guild, roleName: string): Snowflake | null {
   const retVal = guild.roles.cache.find(role => role.name === roleName);
 
   if (!retVal) {
-    throw new Error(`Could not resolve role '${roleName} to an ID.'`);
+    console.log(new Error(`Could not resolve role '${roleName} to an ID.'`));
   }
 
-  return retVal.id;
+  return retVal?.id ?? null;
 }
