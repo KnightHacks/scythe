@@ -2,14 +2,13 @@ import {
   ApplicationCommandOptionData,
   CommandInteraction,
 } from 'discord.js';
-import { ButtonListener } from './ButtonListener';
 
 export type PermissionHandler = (interaction: CommandInteraction) => boolean | Promise<boolean>;
 
 /**
  * Represents a the blueprint for a slash commands.
  */
-export default interface Command {
+export interface Command {
   /**
    * The name of the command.
    */
@@ -30,7 +29,6 @@ export default interface Command {
    * is invoked.
    */
   run(interaction: CommandInteraction): Promise<void> | void;
-  readonly buttonListener?: ButtonListener;
 
   /**
    * The {@link PermissionHandler} that handles the permissions for this command.
