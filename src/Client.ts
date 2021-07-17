@@ -68,6 +68,8 @@ export default class Client extends discord.Client {
         'Development environment detected..., using guild commands instead of application commands.'
       );
       const guild = this.guilds.cache.get(process.env.GUILD_ID);
+      // Clear app commands
+      await this.application?.commands.set([]);
       await guild?.commands.set(commands);
     } else {
       await this.application?.commands.set(commands);
