@@ -105,7 +105,7 @@ export function allRoles(...roleIDs: Snowflake[]): PermissionHandler {
  * @param roles The roles IDs to check for.
  * @returns A permission handler function.
  */
-export function oneRole(...roleIDs: Snowflake[]): PermissionHandler {
+export function inRoles(...roleIDs: Snowflake[]): PermissionHandler {
   return async (interaction) => {
     const member = interaction.member as GuildMember;
     if (!member) {
