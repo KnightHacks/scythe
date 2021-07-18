@@ -6,6 +6,7 @@ import discord, {
   CommandInteraction,
   Guild,
   GuildApplicationCommandPermissionData,
+  Snowflake,
 } from 'discord.js';
 import { dispatch } from './dispatch';
 import { loadCommands } from './loadCommands';
@@ -19,13 +20,22 @@ export default class Client extends discord.Client {
     super(options);
   }
 
-  async pushCommands(commands: Command[], appCommands: ApplicationCommandData[]): Promise<void> {
+  async pushCommands(
+    commands: Command[],
+    appCommands: ApplicationCommandData[]
+  ): Promise<void> {
     let guild: Guild | undefined = undefined;
     if (process.env.GUILD_ID) {
       guild = this.guilds.cache.get(process.env.GUILD_ID);
+    } else {
+      throw new Error('No GUILD_ID found!');
     }
 
-    let fullPermissions: GuildApplicationCommandPermissionData[] | undefined;
+    if (!guild) {
+      throw new Error(
+        'Guild is not initialized, check your GUILD_ID.'
+      );
+    }
 
     // Guild commands propogate instantly, but application commands do not
     // so we only want to use guild commands when in development.
@@ -35,27 +45,20 @@ export default class Client extends discord.Client {
       );
       // Clear app commands
       await this.application?.commands.set([]);
-      const pushedCommands = await guild?.commands.set(appCommands);
-
-      if (!pushedCommands) {
-        throw new Error('Could not push commands');
-      }
-      
-      fullPermissions = pushedCommands?.map(pushCommand => applyPermissions(commands, pushCommand));
-
     } else {
       // Clear guild commands
-      await guild?.commands.set([]);
-      const pushedCommands = await this.application?.commands.set(appCommands);
-      fullPermissions = pushedCommands?.map(pushCommand => applyPermissions(commands, pushCommand));
+      await guild.commands.set([]);
     }
 
-    if (!fullPermissions) {
-      throw new Error('Could not push command permissions.');
-    }
+    const pushedCommands: ApplicationCommand[] = await guild.commands
+      .set(appCommands)
+      .then((x) => [...x.values()]);
+
+    const fullPermissions: GuildApplicationCommandPermissionData[] =
+      generatePermissionData(pushedCommands, commands);
 
     // Apply Permissions (per-guild-only)
-    await guild?.commands.permissions.set({ fullPermissions });
+    await guild.commands.permissions.set({ fullPermissions });
   }
 
   /**
@@ -105,8 +108,8 @@ export default class Client extends discord.Client {
  * @returns an {@link ApplicationCommandData}.
  */
 function toAppCommand(command: Command): ApplicationCommandData {
-
-  const defaultPermission: boolean = (command.allowedRoles ?? command.allowedUsers) === undefined;
+  const defaultPermission: boolean =
+    (command.allowedRoles ?? command.allowedUsers) === undefined;
 
   return {
     name: command.name,
@@ -116,33 +119,54 @@ function toAppCommand(command: Command): ApplicationCommandData {
   };
 }
 
-function applyPermissions(commands: Command[], command: ApplicationCommand): GuildApplicationCommandPermissionData {
-  const fetchedCommand = commands.find(cur => cur.name === command.name);
+function generatePermissionData(
+  pushedCommands: ApplicationCommand[],
+  commands: Command[]
+): GuildApplicationCommandPermissionData[] {
+  return pushedCommands.map((appCommand) => {
+    const command: Command | undefined = commands.find(
+      (c) => c.name === appCommand.name
+    );
+    const permissions = generateAllPermissions(
+      command?.allowedRoles ?? [],
+      command?.allowedUsers ?? []
+    );
+    return {
+      id: appCommand.id,
+      permissions,
+    };
+  });
+}
 
-  const permissions: ApplicationCommandPermissionData[] = [];
+function generateAllPermissions(
+  allowedRoles: Snowflake[],
+  allowedUsers: Snowflake[]
+): ApplicationCommandPermissionData[] {
+  const rolePermissions = generateRolePermissions(allowedRoles);
+  const userPermissions = generateUserPermissions(allowedUsers);
+  return rolePermissions.concat(userPermissions);
+}
 
-  if (fetchedCommand?.allowedRoles) {
-    permissions.push(...fetchedCommand.allowedRoles.map((role): ApplicationCommandPermissionData => (
-      {
-        type: 'ROLE',
-        id: role,
-        permission: true,
-      }
-    )));
-  }
+function generateRolePermissions(
+  allowedRoles: Snowflake[]
+): ApplicationCommandPermissionData[] {
+  return allowedRoles.map(
+    (role): ApplicationCommandPermissionData => ({
+      type: 'ROLE',
+      id: role,
+      permission: true,
+    })
+  );
+}
 
-  if (fetchedCommand?.allowedUsers) {
-    permissions.push(...fetchedCommand.allowedUsers.map((user): ApplicationCommandPermissionData => (
-      {
-        type: 'USER',
-        id: user,
-        permission: true,
-      }
-    )));
-  }
-
-  return {
-    id: command.id,
-    permissions,
-  };
+function generateUserPermissions(
+  allowedUsers: Snowflake[]
+): ApplicationCommandPermissionData[] {
+  return allowedUsers.map(
+    (user): ApplicationCommandPermissionData => ({
+      type: 'USER',
+      id: user,
+      permission: true,
+    })
+  );
 }
