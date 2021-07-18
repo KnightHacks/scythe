@@ -2,6 +2,26 @@ import { GuildMember, Snowflake, TextChannel, ThreadChannel } from 'discord.js';
 import { PermissionHandler } from '../Command';
 import { resolveRoleID } from './role';
 
+/**
+ * A helper function used to aggregate permission handlers.
+ * @param handlers The handlers to aggregate.
+ * @returns A permission handler created from all of the inputs.
+ */
+export function checkAll(...handlers: PermissionHandler[]): PermissionHandler {
+  return async (interaction) => {
+    // Await all of the promises, and complete each of the partial applications.
+    // This is a for-of because we need the functions to execute in series, rather
+    // than concurrently.
+    for (const func of handlers) {
+      if (!(await func(interaction))) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+}
+
 const hasID = (member: GuildMember, id: Snowflake) => member.roles.cache.has(id);
 
 /**
@@ -124,26 +144,6 @@ export function inRoles(...roleIDs: Snowflake[]): PermissionHandler {
     }
 
     return allowed;
-  };
-}
-
-/**
- * A helper function used to aggregate permission handlers.
- * @param handlers The handlers to aggregate.
- * @returns A permission handler created from all of the inputs.
- */
-export function checkAll(...handlers: PermissionHandler[]): PermissionHandler {
-  return async (interaction) => {
-    // Await all of the promises, and complete each of the partial applications.
-    // This is a for-of because we need the functions to execute in series, rather
-    // than concurrently.
-    for (const func of handlers) {
-      if (!(await func(interaction))) {
-        return false;
-      }
-    }
-
-    return true;
   };
 }
 
