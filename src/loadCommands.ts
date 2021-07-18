@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 import path from 'path';
-import Command, { isCommand } from './Command';
+import { Command, isCommand } from './Command';
 
 /**
  * Dynamically loads commands objects.
