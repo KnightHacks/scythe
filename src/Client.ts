@@ -1,8 +1,11 @@
 import discord, {
+  ApplicationCommand,
   ApplicationCommandData,
+  ApplicationCommandPermissionData,
   ClientOptions,
   CommandInteraction,
   Guild,
+  GuildApplicationCommandPermissionData,
 } from 'discord.js';
 import { dispatch } from './dispatch';
 import { loadCommands } from './loadCommands';
@@ -16,11 +19,13 @@ export default class Client extends discord.Client {
     super(options);
   }
 
-  async pushCommands(commands: ApplicationCommandData[]): Promise<void> {
+  async pushCommands(commands: Command[], appCommands: ApplicationCommandData[]): Promise<void> {
     let guild: Guild | undefined = undefined;
     if (process.env.GUILD_ID) {
       guild = this.guilds.cache.get(process.env.GUILD_ID);
     }
+
+    let fullPermissions: GuildApplicationCommandPermissionData[] | undefined;
 
     // Guild commands propogate instantly, but application commands do not
     // so we only want to use guild commands when in development.
@@ -30,12 +35,27 @@ export default class Client extends discord.Client {
       );
       // Clear app commands
       await this.application?.commands.set([]);
-      await guild?.commands.set(commands);
+      const pushedCommands = await guild?.commands.set(appCommands);
+
+      if (!pushedCommands) {
+        throw new Error('Could not push commands');
+      }
+      
+      fullPermissions = pushedCommands?.map(pushCommand => applyPermissions(commands, pushCommand));
+
     } else {
       // Clear guild commands
       await guild?.commands.set([]);
-      await this.application?.commands.set(commands);
+      const pushedCommands = await this.application?.commands.set(appCommands);
+      fullPermissions = pushedCommands?.map(pushCommand => applyPermissions(commands, pushCommand));
     }
+
+    if (!fullPermissions) {
+      throw new Error('Could not push command permissions.');
+    }
+
+    // Apply Permissions (per-guild-only)
+    await guild?.commands.permissions.set({ fullPermissions });
   }
 
   /**
@@ -51,10 +71,10 @@ export default class Client extends discord.Client {
 
     if (!this.readyAt) {
       // Register commands to the discord API, once the client is ready.
-      this.once('ready', () => this.pushCommands(appCommands));
+      this.once('ready', () => this.pushCommands(commands, appCommands));
     } else {
       // If we get here the client is already ready, so we'll register immediately.
-      await this.pushCommands(commands);
+      await this.pushCommands(commands, appCommands);
     }
 
     // Enable dispatcher.
@@ -85,9 +105,44 @@ export default class Client extends discord.Client {
  * @returns an {@link ApplicationCommandData}.
  */
 function toAppCommand(command: Command): ApplicationCommandData {
+
+  const defaultPermission: boolean = (command.guildRoles ?? command.guildUsers) === undefined;
+
   return {
     name: command.name,
     options: command.options,
     description: command.description,
+    defaultPermission,
+  };
+}
+
+function applyPermissions(commands: Command[], command: ApplicationCommand): GuildApplicationCommandPermissionData {
+  const fetchedCommand = commands.find(cur => cur.name === command.name);
+
+  const permissions: ApplicationCommandPermissionData[] = [];
+
+  if (fetchedCommand?.guildRoles) {
+    permissions.push(...fetchedCommand.guildRoles.map((role): ApplicationCommandPermissionData => (
+      {
+        type: 'ROLE',
+        id: role,
+        permission: true,
+      }
+    )));
+  }
+
+  if (fetchedCommand?.guildUsers) {
+    permissions.push(...fetchedCommand.guildUsers.map((user): ApplicationCommandPermissionData => (
+      {
+        type: 'USER',
+        id: user,
+        permission: true,
+      }
+    )));
+  }
+
+  return {
+    id: command.id,
+    permissions,
   };
 }
