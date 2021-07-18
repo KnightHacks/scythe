@@ -44,7 +44,7 @@ export interface Command {
   /**
    * The {@link PermissionHandler} that handles the permissions for this command.
    */
-  readonly permissions?: PermissionHandler;
+  readonly permissionsHandler?: PermissionHandler;
 }
 
 /**

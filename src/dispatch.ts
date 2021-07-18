@@ -14,8 +14,8 @@ export async function dispatch(
     return;
   }
 
-  if (command.permissions) {
-    const check = await command.permissions(interaction);
+  if (command.permissionsHandler) {
+    const check = await command.permissionsHandler(interaction);
     if (!check) {
       /*
        * It's not guaranteed that an interaction will be responded to
