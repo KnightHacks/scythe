@@ -106,7 +106,7 @@ export default class Client extends discord.Client {
  */
 function toAppCommand(command: Command): ApplicationCommandData {
 
-  const defaultPermission: boolean = (command.guildRoles ?? command.guildUsers) === undefined;
+  const defaultPermission: boolean = (command.allowedRoles ?? command.allowedUsers) === undefined;
 
   return {
     name: command.name,
@@ -121,8 +121,8 @@ function applyPermissions(commands: Command[], command: ApplicationCommand): Gui
 
   const permissions: ApplicationCommandPermissionData[] = [];
 
-  if (fetchedCommand?.guildRoles) {
-    permissions.push(...fetchedCommand.guildRoles.map((role): ApplicationCommandPermissionData => (
+  if (fetchedCommand?.allowedRoles) {
+    permissions.push(...fetchedCommand.allowedRoles.map((role): ApplicationCommandPermissionData => (
       {
         type: 'ROLE',
         id: role,
@@ -131,8 +131,8 @@ function applyPermissions(commands: Command[], command: ApplicationCommand): Gui
     )));
   }
 
-  if (fetchedCommand?.guildUsers) {
-    permissions.push(...fetchedCommand.guildUsers.map((user): ApplicationCommandPermissionData => (
+  if (fetchedCommand?.allowedUsers) {
+    permissions.push(...fetchedCommand.allowedUsers.map((user): ApplicationCommandPermissionData => (
       {
         type: 'USER',
         id: user,

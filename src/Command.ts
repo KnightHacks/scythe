@@ -34,12 +34,12 @@ export interface Command {
   /**
    * The static role permissions for this command.
    */
-  guildRoles?: Snowflake[];
+  allowedRoles?: Snowflake[];
 
   /**
    * The static user permissions for this commands
    */
-  guildUsers?: Snowflake[];
+  allowedUsers?: Snowflake[];
 
   /**
    * The {@link PermissionHandler} that handles the permissions for this command.
