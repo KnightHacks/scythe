@@ -47,7 +47,7 @@ export function allRoleNames(...roles: string[]): PermissionHandler {
  * @param roles The roles names to check for.
  * @returns A permission handler function.
  */
-export function oneRoleName(...roles: string[]): PermissionHandler {
+export function inRoleNames(...roles: string[]): PermissionHandler {
   return async (interaction) => {
     // FIXME is this cast safe?
     const member = interaction.member as GuildMember;
