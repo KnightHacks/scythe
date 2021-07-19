@@ -33,7 +33,7 @@
     "@typescript-eslint/eslint-plugin": "^4.28.2",
     "@typescript-eslint/parser": "^4.28.2",
     "babel-jest": "^27.0.6",
-    "discord.js": "^13.0.0-dev.5ca97c9.1626480265",
+    "discord.js": "^13.0.0-dev.4d53d0f.1626566655",
     "eslint": "^7.30.0",
     "jest": "^27.0.6",
     "nodemon": "^2.0.12",
