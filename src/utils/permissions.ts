@@ -43,7 +43,7 @@ export function checkOne(...handlers: PermissionHandler[]): PermissionHandler {
 }
 
 /**
- * Checks if the client has certain permission flags.
+ * Checks if the client has the given permission flags.
  * @param flags The permission flags to check against.
  * @returns A permission handler.
  */
@@ -66,7 +66,7 @@ export function hasClientFlags(...flags: PermissionResolvable[]): PermissionHand
 }
 
 /**
- * Checks if the user has the right
+ * Checks if the client has the given permission flags.
  * @param flags The permission flags to check against
  * @returns A permission handler.
  */
