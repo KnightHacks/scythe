@@ -1,4 +1,4 @@
-import { GuildMember, Snowflake, TextChannel, ThreadChannel } from 'discord.js';
+import { GuildMember, PermissionResolvable, Permissions, Snowflake, TextChannel, ThreadChannel } from 'discord.js';
 import { PermissionHandler } from '../Command';
 import { resolveRoleID } from './role';
 
@@ -19,6 +19,76 @@ export function checkAll(...handlers: PermissionHandler[]): PermissionHandler {
     }
 
     return true;
+  };
+}
+
+/**
+ * A helper function used to combine and check for at least one satisfied
+ * handler from the given handler.
+ * @param handlers The handlers to check against.
+ * @returns A permission handler.
+ */
+export function checkOne(...handlers: PermissionHandler[]): PermissionHandler {
+  return async (interaction) => {
+
+    // Short-Circuit if one condition is satisfied.
+    for (const func of handlers) {
+      if (await func(interaction)) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+}
+
+/**
+ * Checks if the client has certain permission flags.
+ * @param flags The permission flags to check against.
+ * @returns A permission handler.
+ */
+export function hasClientFlags(...flags: PermissionResolvable[]): PermissionHandler {
+  return (interaction) => {
+    const { user } = interaction.client;
+    const { channel } = interaction;
+
+    if (!(channel instanceof TextChannel)) {
+      return false;
+    }
+
+    if (!user?.id) {
+      return false;
+    }
+  
+    const perms = channel?.permissionsFor(user.id);
+    return perms?.has(flags) ?? false;
+  };
+}
+
+/**
+ * Checks if the user has the right
+ * @param flags The permission flags to check against
+ * @returns A permission handler.
+ */
+export function hasUserFlags(...flags: PermissionResolvable[]): PermissionHandler {
+  return (interaction) => {
+    
+    const permissions = interaction.member?.permissions;
+
+    if (!permissions) {
+      console.log('Could not lookup permissions');
+      return false;
+    }
+
+    let allowed = true;
+    if (permissions instanceof Permissions) {
+      allowed &&= permissions.has(flags);
+    } else {
+      const perms = new Permissions(permissions);
+      allowed &&= perms.has(flags);
+    }
+
+    return allowed;
   };
 }
 
