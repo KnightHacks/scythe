@@ -1,6 +1,7 @@
 import {
   ApplicationCommandOptionData,
   CommandInteraction,
+  Snowflake,
 } from 'discord.js';
 
 export type PermissionHandler = (interaction: CommandInteraction) => boolean | Promise<boolean>;
@@ -31,9 +32,19 @@ export interface Command {
   run(interaction: CommandInteraction): Promise<void> | void;
 
   /**
+   * The static role permissions for this command.
+   */
+  allowedRoles?: Snowflake[];
+
+  /**
+   * The static user permissions for this commands
+   */
+  allowedUsers?: Snowflake[];
+
+  /**
    * The {@link PermissionHandler} that handles the permissions for this command.
    */
-  readonly permissions?: PermissionHandler;
+  readonly permissionHandler?: PermissionHandler;
 }
 
 /**
