@@ -45,14 +45,13 @@ export default class Client extends discord.Client {
       console.log(
         'Development environment detected..., using guild commands instead of application commands.'
       );
-      // Clear app commands
-      await this.application?.commands.set([]);
+
+      await this.clearAllCommands(guild);
       pushedCommands = await this.application?.commands
         .set(appCommands)
         .then((x) => [...x.values()]);
     } else {
-      // Clear guild commands
-      await guild.commands.set([]);
+      await this.clearAllCommands(guild);
       pushedCommands = await guild.commands
         .set(appCommands)
         .then((x) => [...x.values()]);
@@ -67,6 +66,11 @@ export default class Client extends discord.Client {
 
     // Apply Permissions (per-guild-only)
     await guild.commands.permissions.set({ fullPermissions });
+  }
+
+  private async clearAllCommands(guild: Guild) {
+    await guild.commands.set([]);
+    await this.application?.commands.set([]);
   }
 
   /**
