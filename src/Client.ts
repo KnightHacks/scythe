@@ -37,6 +37,8 @@ export default class Client extends discord.Client {
       );
     }
 
+    let pushedCommands: ApplicationCommand[] | undefined;
+
     // Guild commands propogate instantly, but application commands do not
     // so we only want to use guild commands when in development.
     if (process.env.NODE_ENV === 'development') {
@@ -45,14 +47,20 @@ export default class Client extends discord.Client {
       );
       // Clear app commands
       await this.application?.commands.set([]);
+      pushedCommands = await this.application?.commands
+        .set(appCommands)
+        .then((x) => [...x.values()]);
     } else {
       // Clear guild commands
       await guild.commands.set([]);
+      pushedCommands = await guild.commands
+        .set(appCommands)
+        .then((x) => [...x.values()]);
     }
 
-    const pushedCommands: ApplicationCommand[] = await guild.commands
-      .set(appCommands)
-      .then((x) => [...x.values()]);
+    if (!pushedCommands) {
+      throw new Error('Could not push commands to server!');
+    }
 
     const fullPermissions: GuildApplicationCommandPermissionData[] =
       generatePermissionData(pushedCommands, commands);
