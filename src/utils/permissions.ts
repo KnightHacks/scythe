@@ -100,7 +100,7 @@ const hasID = (member: GuildMember, id: Snowflake) => member.roles.cache.has(id)
  * @returns A permission handler function.
  */
 export function allRoleNames(...roles: string[]): PermissionHandler {
-  return async (interaction) => {
+  return (interaction) => {
     let allowed = true;
     // FIXME is this cast safe?
     const member = interaction.member as GuildMember;
@@ -121,11 +121,9 @@ export function allRoleNames(...roles: string[]): PermissionHandler {
         return false;
       }
       const roleIDs = roles.map((role) => resolveRoleID(guild, role));
-      const errMsg =
-      'You must have the following roles to run this command:\n'.concat(
+      return 'You must have the following roles to run this command:\n'.concat(
         ...roleIDs.map((role) => `- <@&${role}>\n`)
       );
-      await interaction.reply({ content: errMsg, ephemeral: true });
     }
 
     return allowed;
@@ -138,7 +136,7 @@ export function allRoleNames(...roles: string[]): PermissionHandler {
  * @returns A permission handler function.
  */
 export function inRoleNames(...roles: string[]): PermissionHandler {
-  return async (interaction) => {
+  return (interaction) => {
     // FIXME is this cast safe?
     const member = interaction.member as GuildMember;
     const allowed = roles.some((roleName) =>
@@ -152,11 +150,9 @@ export function inRoleNames(...roles: string[]): PermissionHandler {
         return false;
       }
       const roleIDs = roles.map((role) => resolveRoleID(guild, role));
-      const errMsg =
-      'You must have one of the following roles to run this command:\n'.concat(
+      return 'You must have one of the following roles to run this command:\n'.concat(
         ...roleIDs.map((role) => `- <@&${role}>\n`)
       );
-      await interaction.reply({ content: errMsg, ephemeral: true });
     }
 
     return allowed;
@@ -169,7 +165,7 @@ export function inRoleNames(...roles: string[]): PermissionHandler {
  * @returns A permission handler function.
  */
 export function allRoles(...roleIDs: Snowflake[]): PermissionHandler {
-  return async (interaction) => {
+  return (interaction) => {
     const member = interaction.member as GuildMember;
     let allowed = true;
     if (!member) {
@@ -179,11 +175,9 @@ export function allRoles(...roleIDs: Snowflake[]): PermissionHandler {
     roleIDs.forEach(roleID => allowed &&= hasID(member, roleID));
 
     if (!allowed) {
-      const errMsg =
-      'You must have the following roles to run this command:\n'.concat(
+      return 'You must have the following roles to run this command:\n'.concat(
         ...roleIDs.map((role) => `- <@&${role}>\n`)
       );
-      await interaction.reply({ content: errMsg, ephemeral: true });
     }
     
     return allowed;
@@ -196,7 +190,7 @@ export function allRoles(...roleIDs: Snowflake[]): PermissionHandler {
  * @returns A permission handler function.
  */
 export function inRoles(...roleIDs: Snowflake[]): PermissionHandler {
-  return async (interaction) => {
+  return (interaction) => {
     const member = interaction.member as GuildMember;
     if (!member) {
       return false;
@@ -205,12 +199,9 @@ export function inRoles(...roleIDs: Snowflake[]): PermissionHandler {
     const allowed = member.roles.cache.some(role => roleIDs.includes(role.id));
 
     if (!allowed) {
-      const errMsg =
-      'You must have one of the following roles to run this command:\n'.concat(
+      return 'You must have one of the following roles to run this command:\n'.concat(
         ...roleIDs.map((role) => `- <@&${role}>\n`)
       );
-      
-      await interaction.reply({ content: errMsg, ephemeral: true });
     }
 
     return allowed;
@@ -223,7 +214,7 @@ export function inRoles(...roleIDs: Snowflake[]): PermissionHandler {
  * @returns A permission handler function.
  */
 export function inChannelNames(...channels: string[]): PermissionHandler {
-  return async (interaction) => {
+  return (interaction) => {
     // Resolve each of the channel names
     const channelIDs = channels.map(
       (channelName) =>
@@ -240,12 +231,9 @@ export function inChannelNames(...channels: string[]): PermissionHandler {
     const valid = channelIDs.includes(interaction.channelId);
 
     if (!valid) {
-      const errMsg = 'Please use this command in an allowed channel:\n'.concat(
+      return 'Please use this command in an allowed channel:\n'.concat(
         ...channelIDs.map((channel) => `- <#${channel}>\n`)
       );
-
-      // Send error message.
-      await interaction.reply({ content: errMsg, ephemeral: true });
     }
 
     return valid;
@@ -258,7 +246,7 @@ export function inChannelNames(...channels: string[]): PermissionHandler {
  * @returns A permission handler function.
  */
 export function inChannels(...channelIDs: Snowflake[]): PermissionHandler {
-  return async (interaction) => {
+  return (interaction) => {
 
     if (!interaction.channel) {
       console.log('No channels found');
@@ -267,12 +255,9 @@ export function inChannels(...channelIDs: Snowflake[]): PermissionHandler {
     const allowed = channelIDs.includes(interaction.channelId);
 
     if (!allowed) {
-      const errMsg = 'Please use this command in an allowed channel:\n'.concat(
+      return 'Please use this command in an allowed channel:\n'.concat(
         ...channelIDs.map((channel) => `- <#${channel}>\n`)
       );
-
-      // Send error message.
-      await interaction.reply({ content: errMsg, ephemeral: true });
     }
 
     return allowed;
@@ -285,7 +270,7 @@ export function inChannels(...channelIDs: Snowflake[]): PermissionHandler {
  * @returns A permission handler.
  */
 export function inCategoryNames(...categories: string[]): PermissionHandler {
-  return async (interaction) => {
+  return (interaction) => {
     if (!(interaction.channel instanceof TextChannel)) {
       return false;
     }
@@ -298,11 +283,9 @@ export function inCategoryNames(...categories: string[]): PermissionHandler {
     const allowed = categories.includes(category);
 
     if (!allowed) {
-      const content =
-      'Please use the command in the following categories:\n'.concat(
+      return 'Please use the command in the following categories:\n'.concat(
         ...categories.map((cur) => `- ${cur}\n`)
       );
-      await interaction.reply({ content, ephemeral: true });
     }
 
     return allowed;
@@ -315,7 +298,7 @@ export function inCategoryNames(...categories: string[]): PermissionHandler {
  * @returns A permission handler.
  */
 export function inCategories(...categoryIDs: Snowflake[]): PermissionHandler {
-  return async (interaction) => {
+  return (interaction) => {
     if (!(interaction.channel instanceof TextChannel)) {
       return false;
     }
@@ -329,8 +312,7 @@ export function inCategories(...categoryIDs: Snowflake[]): PermissionHandler {
     const allowed = categoryIDs.includes(category.id);
 
     if (!allowed) {
-      const content = 'This command is not allowed in this category';
-      await interaction.reply({ content, ephemeral: true });
+      return 'This command is not allowed in this category';
     }
 
     return allowed;

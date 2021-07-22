@@ -47,12 +47,12 @@ export default class Client extends discord.Client {
       );
 
       await this.clearAllCommands(guild);
-      pushedCommands = await this.application?.commands
+      pushedCommands = await guild.commands
         .set(appCommands)
         .then((x) => [...x.values()]);
     } else {
       await this.clearAllCommands(guild);
-      pushedCommands = await guild.commands
+      pushedCommands = await this.application?.commands
         .set(appCommands)
         .then((x) => [...x.values()]);
     }

@@ -4,7 +4,7 @@ import {
   Snowflake,
 } from 'discord.js';
 
-export type PermissionHandler = (interaction: CommandInteraction) => boolean | Promise<boolean>;
+export type PermissionHandler = (interaction: CommandInteraction) => boolean | string | Promise<string | boolean>;
 
 /**
  * Represents a the blueprint for a slash commands.

@@ -16,18 +16,24 @@ export async function dispatch(
 
   if (command.permissionHandler) {
     const check = await command.permissionHandler(interaction);
-    if (!check) {
-      /*
-       * It's not guaranteed that an interaction will be responded to
-       * by the permission handlers. If it isn't, we provide a default
-       * error message so the interaction is acknowledged.
-       */
-      if (!interaction.replied) {
-        interaction.reply({
-          content: 'You do not have permission to execute this command.',
-          ephemeral: true,
-        });
-      }
+
+    // A message was provided, use it.
+    if (typeof check === 'string') {
+      await interaction.reply({
+        content: check,
+        ephemeral: true,
+      });
+
+      return;
+    }
+
+    // A boolean was provided, use generic message.
+    if (typeof check === 'boolean' && !check) {
+      await interaction.reply({
+        content: 'You do not have permission to execute this command.',
+        ephemeral: true,
+      });
+
       return;
     }
   }
