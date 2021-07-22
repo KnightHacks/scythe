@@ -1,5 +1,6 @@
 import { CommandInteraction } from 'discord.js';
 import { Command } from './Command';
+import { getSubCommands } from './utils/interactions';
 
 export async function dispatch(
   interaction: CommandInteraction,
@@ -48,4 +49,6 @@ export async function dispatch(
   } else {
     await command.run(interaction);
   }
+
+  const subCommandData = getSubCommands(interaction);
 }
