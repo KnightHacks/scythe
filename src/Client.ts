@@ -119,7 +119,7 @@ export default class Client extends discord.Client {
  * Converts a {@link Command} to an {@link ApplicationCommandData}.
  * @returns an {@link ApplicationCommandData}.
  */
-function toAppCommand(command: Command): ApplicationCommandData {
+export function toAppCommand(command: Command): ApplicationCommandData {
   const defaultPermission: boolean =
     (command.allowedRoles ?? command.allowedUsers) === undefined;
 
