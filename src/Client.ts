@@ -2,17 +2,27 @@ import discord, {
   ApplicationCommand,
   ApplicationCommandData,
   ApplicationCommandPermissionData,
+  ButtonInteraction,
   ClientOptions,
   CommandInteraction,
   Guild,
   GuildApplicationCommandPermissionData,
+  MessageActionRow,
   Snowflake,
 } from 'discord.js';
 import { dispatch } from './dispatch';
 import { loadCommands } from './loadCommands';
 import { Command } from './Command';
+import { ButtonHandler } from './ButtonHandler';
+import { toComponents, UIComponent } from './UI';
 
 export default class Client extends discord.Client {
+  /**
+   * A map from button IDs to handler functions. This is used to implement
+   * button click handlers.
+   */
+  buttonListeners: Map<string, ButtonHandler> = new Map();
+
   /**
    * Handles commands for the bot.
    */
@@ -32,9 +42,7 @@ export default class Client extends discord.Client {
     }
 
     if (!guild) {
-      throw new Error(
-        'Guild is not initialized, check your GUILD_ID.'
-      );
+      throw new Error('Guild is not initialized, check your GUILD_ID.');
     }
 
     let pushedCommands: ApplicationCommand[] | undefined;
@@ -95,23 +103,54 @@ export default class Client extends discord.Client {
     // Enable dispatcher.
     this.on('interactionCreate', (interaction) => {
       if (interaction instanceof CommandInteraction) {
-        dispatch(interaction, commands);
+        dispatch(interaction, commands, this);
       }
 
       // FIXME figure out a button/select menu api that
-      /*
       if (interaction instanceof ButtonInteraction) {
-        const handler = client.buttonListeners.get(interaction.customId);
+        const handler = this.buttonListeners.get(interaction.customId);
 
         if (!handler) {
           return;
         }
 
         // Run handler.
-        handler(interaction);
+        handler(interaction, this);
       }
-      */
     });
+  }
+
+  /**
+   * Generates a discord.js `MessageActionRow[]` that can be used in a
+   * message reply as the `components` argument. Allows use of `onClick` and
+   * `onSelect` by autogenerating and registering IDs.
+   *
+   * @param ui Either a single `UIComponent` or a 1D or 2D array of `UIComponent`s
+   * @returns a generated `MessageActionRow[]`
+   */
+  registerUI(
+    ui: UIComponent | UIComponent[] | UIComponent[][]
+  ): MessageActionRow[] {
+    /*
+     * We allow the user to pass in a single UI element, a row of elements, or
+     * multiple rows of elements.
+     */
+    if (!Array.isArray(ui)) {
+      // single item, so we need to wrap in [][] because toComponents expects a UIComponent[][]
+      return toComponents(this, [[ui]]);
+    } else {
+      const maybeArray: UIComponent | UIComponent[] | undefined = ui[0];
+      if (maybeArray === undefined) {
+        // we had an empty single array
+        return toComponents(this, [[]]);
+      } else if (Array.isArray(maybeArray)) {
+        // we cast because it must be a 2d array
+        return toComponents(this, ui as UIComponent[][]);
+      } else {
+        // only a 1d array, so wrap in an array once
+        return toComponents(this, [ui as UIComponent[]]);
+      }
+    }
   }
 }
 

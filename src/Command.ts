@@ -3,6 +3,7 @@ import {
   CommandInteraction,
   Snowflake,
 } from 'discord.js';
+import Client from './Client';
 
 export type PermissionHandler = (interaction: CommandInteraction) => boolean | string | Promise<string | boolean>;
 
@@ -29,7 +30,7 @@ export interface Command {
    * The function that gets executed after the command
    * is invoked.
    */
-  run(interaction: CommandInteraction): Promise<void> | void;
+  run(interaction: CommandInteraction, client: Client): Promise<void> | void;
 
   /**
    * The static role permissions for this command.

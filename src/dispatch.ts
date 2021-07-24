@@ -1,9 +1,11 @@
 import { CommandInteraction } from 'discord.js';
 import { Command } from './Command';
+import Client from './Client';
 
 export async function dispatch(
   interaction: CommandInteraction,
-  commands: Command[]
+  commands: Command[],
+  client: Client
 ): Promise<void> {
   // FIXME O(n) performance
   const command = commands.find((c) => c.name === interaction.commandName);
@@ -41,11 +43,11 @@ export async function dispatch(
   if (process.env.NODE_ENV === 'production') {
     try {
       console.log('got here');
-      await command.run(interaction);
+      await command.run(interaction, client);
     } catch(error) {
       console.error(error);
     }
   } else {
-    await command.run(interaction);
+    await command.run(interaction, client);
   }
 }
