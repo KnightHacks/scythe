@@ -45,11 +45,17 @@ export default class Client extends discord.Client {
     command.description === appCommand.description;
   }
 
-  optionsEqual(a: ApplicationCommandOptionData[], b: ApplicationCommandOptionData[]) {
+  optionsEqual(a: ApplicationCommandOptionData[], b: ApplicationCommandOptionData[]): boolean {
+
+    if (a.length !== b.length) {
+      return false;
+    }
+    
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return b.every((option, i) => this.optionEqual(option, a[i]!));
   }
 
-  optionEqual(a: ApplicationCommandOptionData, b: ApplicationCommandOptionData) {
+  optionEqual(a: ApplicationCommandOptionData, b: ApplicationCommandOptionData): boolean {
     return a.name === b.name &&
     a.type === b.type &&
     a.description === b.description;
@@ -79,16 +85,7 @@ export default class Client extends discord.Client {
       console.log('Finished syncing');
       return;
     }
-
-    let diff = true;
-
-    // Check per-command diff
-    appCommands.forEach((appCommand, i) => {
-      if (!this.commandEquals(commands[i], appCommand)) {
-        console.log({command: commands[i]?.options, appCommand: appCommand.options });
-      }
-      diff &&= this.commandEquals(commands[i], appCommand);
-    });
+    const diff = appCommands.every((appCommand, i) => this.commandEquals(commands[i], appCommand));
 
     if (diff) {
       console.log('Commands are already in sync, nothing to push...');
