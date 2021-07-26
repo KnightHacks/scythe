@@ -2,7 +2,7 @@ import { ApplicationCommandOptionData, ApplicationCommand, ApplicationCommandDat
 import { isEqual } from 'lodash';
 import { Command } from '..';
 
-function cleanOption(option: ApplicationCommandOptionData): ApplicationCommandOptionData {
+function normalizeOption(option: ApplicationCommandOptionData): ApplicationCommandOptionData {
   if (!option.required) {
     option.required = false; // Default for required
   }
@@ -17,15 +17,15 @@ function cleanOption(option: ApplicationCommandOptionData): ApplicationCommandOp
     option.options = undefined;
   } else {
     // Recurse through sub options.
-    option.options.map(cleanOption);
+    option.options.map(normalizeOption);
   }
   
   return option;
 }
   
 export function toData(command: ApplicationCommand | Command): ApplicationCommandData {
-  
-  const newOptions = command.options?.map(cleanOption);
+  // Normalize all of the options.
+  const newOptions = command.options?.map(normalizeOption);
   
   return {
     name: command.name,
@@ -43,11 +43,7 @@ export function commandEquals(a?: ApplicationCommandData, b?: ApplicationCommand
   if (!a || !b) {
     return false;
   }
-
-  if (!isEqual(a.options, b.options)) {
-    console.log({ command: a.options, appCommand: b.options });
-  }
-
+  
   return a.name === b.name &&
     isEqual(a.options, b.options) &&
     a.description === b.description;

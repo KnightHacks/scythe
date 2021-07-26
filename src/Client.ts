@@ -1,9 +1,9 @@
 import discord, {
   ApplicationCommand,
   ApplicationCommandData,
-  ApplicationCommandOptionData,
   ApplicationCommandPermissionData,
   ClientOptions,
+  Collection,
   CommandInteraction,
   Guild,
   GuildApplicationCommandPermissionData,
@@ -12,49 +12,19 @@ import discord, {
 import { dispatch } from './dispatch';
 import { loadCommands } from './loadCommands';
 import { Command } from './Command';
-import { commandEquals } from './utils/command';
+import { commandEquals, toData } from './utils/command';
 
-function cleanOption(option: ApplicationCommandOptionData): ApplicationCommandOptionData {
-  if (!option.required) {
-    option.required = false; // Default for required
-  }
-
-  // These stubs are needed for deep comparisons
-  // because discord.js return values set to undefined.
-  if (!option.choices) {
-    option.choices = undefined;
-  }
-
-  if (!option.options) {
-    option.options = undefined;
-  } else {
-    // Recurse through sub options.
-    option.options.map(cleanOption);
-  }
-
-  return option;
-}
-
-function toData(command: ApplicationCommand | Command): ApplicationCommandData {
-
-  const newOptions = command.options?.map(cleanOption);
-
-  return {
-    name: command.name,
-    description: command.description,
-    options: newOptions ?? []
-  };
-}
 
 export default class Client extends discord.Client {
+
+  private commands = new Collection<string, Command>();
+
   /**
    * Handles commands for the bot.
    */
   constructor(options: ClientOptions) {
     super(options);
   }  
-
-  
 
   // eslint-disable-next-line @typescript-eslint/require-await
   async syncCommands(commands: Command[]): Promise<void> {
@@ -73,14 +43,15 @@ export default class Client extends discord.Client {
     const appCommands = rawCommands.map(toData);
     const clientCommands = commands.map(toData);
 
-    console.log(JSON.stringify(appCommands));
-
-    // If the length is not the same it's obvious that the commands aren't the same.
-    if (appCommands.length !== commands.length) {
-      console.log({rawCommands: rawCommands.size, commands: commands.length});
+    const push = async () => {
       console.log('Local commands differ from remote commands, syncing now...');
       await this.pushCommands(commands);
       console.log('Finished syncing');
+    };
+
+    // If the length is not the same it's obvious that the commands aren't the same.
+    if (appCommands.length !== commands.length) {
+      await push();
       return;
     }
     const diff = appCommands.every((appCommand, i) => commandEquals(clientCommands[i], appCommand));
@@ -90,13 +61,11 @@ export default class Client extends discord.Client {
       return;
     }
 
-    console.log('Local commands differ from remote commands, syncing now.');
-    await this.pushCommands(commands);
-    console.log('Finished syncing');
+    await push();
   }
 
   async pushCommands(
-    appCommands: ApplicationCommandData[]
+    appCommands: ApplicationCommandData[],
   ): Promise<void> {
     let guild: Guild | undefined = undefined;
     if (process.env.GUILD_ID) {
@@ -124,7 +93,6 @@ export default class Client extends discord.Client {
         .set(appCommands)
         .then((x) => [...x.values()]);
     } else {
-      await this.clearAllCommands(guild);
       pushedCommands = await this.application?.commands
         .set(appCommands)
         .then((x) => [...x.values()]);
@@ -134,16 +102,11 @@ export default class Client extends discord.Client {
       return;
     }
 
-    // const fullPermissions: GuildApplicationCommandPermissionData[] =
-    //   generatePermissionData(pushedCommands, commands);
+    const fullPermissions: GuildApplicationCommandPermissionData[] =
+      generatePermissionData(pushedCommands, this.commands.array());
 
     // Apply Permissions (per-guild-only)
-    // await guild.commands.permissions.set({ fullPermissions });
-  }
-
-  private async clearAllCommands(guild: Guild) {
-    await guild.commands.set([]);
-    await this.application?.commands.set([]);
+    await guild.commands.permissions.set({ fullPermissions });
   }
 
   /**
@@ -153,6 +116,10 @@ export default class Client extends discord.Client {
   async registerCommands(dir: string): Promise<void> {
     // Load all of the commands in.
     const commands = await loadCommands(dir);
+
+    commands.forEach(command => {
+      this.commands.set(command.name, command);
+    });
 
     if (!this.isReady()) {
       // Register commands to the discord API, once the client is ready.
