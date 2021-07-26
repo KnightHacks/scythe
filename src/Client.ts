@@ -26,7 +26,6 @@ export default class Client extends discord.Client {
     super(options);
   }  
 
-  // eslint-disable-next-line @typescript-eslint/require-await
   async syncCommands(commands: Command[]): Promise<void> {
 
     if (!this.isReady()) {
