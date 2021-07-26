@@ -1,6 +1,7 @@
 import discord, {
   ApplicationCommand,
   ApplicationCommandData,
+  ApplicationCommandOptionData,
   ApplicationCommandPermissionData,
   ClientOptions,
   CommandInteraction,
@@ -12,12 +13,91 @@ import { dispatch } from './dispatch';
 import { loadCommands } from './loadCommands';
 import { Command } from './Command';
 
+
 export default class Client extends discord.Client {
   /**
    * Handles commands for the bot.
    */
   constructor(options: ClientOptions) {
     super(options);
+  }
+
+  toData(command: ApplicationCommand | Command): ApplicationCommandData {
+    return {
+      name: command.name,
+      description: command.description,
+      options: command.options
+    };
+  }
+
+  commandEquals(command?: Command, appCommand?: ApplicationCommandData): boolean {
+
+    if (!command && !appCommand) {
+      return true;
+    }
+
+    if (!command || !appCommand) {
+      return false;
+    }
+
+    return command.name === appCommand.name &&
+    this.optionsEqual(command.options ?? [], appCommand.options ?? []) &&
+    command.description === appCommand.description;
+  }
+
+  optionsEqual(a: ApplicationCommandOptionData[], b: ApplicationCommandOptionData[]) {
+    return b.every((option, i) => this.optionEqual(option, a[i]!));
+  }
+
+  optionEqual(a: ApplicationCommandOptionData, b: ApplicationCommandOptionData) {
+    return a.name === b.name &&
+    a.type === b.type &&
+    a.description === b.description;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/require-await
+  async syncCommands(commands: Command[]): Promise<void> {
+
+    if (!this.isReady()) {
+      throw new Error('This must be used after the client is ready.');
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const rawCommands = process.env.NODE_ENV === 'development' ?  await this.guilds.cache.get(process.env.GUILD_ID!)?.commands.fetch() : await this.application.commands.fetch();
+
+    if (!rawCommands) {
+      throw new Error('Could not fetch remote commands!');
+    }
+
+    const appCommands = rawCommands.map(this.toData);
+
+    // If the length is not the same it's obvious that the commands aren't the same.
+    if (appCommands.length !== commands.length) {
+      console.log({rawCommands: rawCommands.size, commands: commands.length});
+      console.log('Local commands differ from remote commands, syncing now...');
+      // await this.pushCommands(commands, commands);
+      console.log('Finished syncing');
+      return;
+    }
+
+    let diff = true;
+
+    // Check per-command diff
+    appCommands.forEach((appCommand, i) => {
+      if (!this.commandEquals(commands[i], appCommand)) {
+        console.log({command: commands[i]?.options, appCommand: appCommand.options });
+      }
+      diff &&= this.commandEquals(commands[i], appCommand);
+    });
+
+    if (diff) {
+      console.log('Commands are already in sync, nothing to push...');
+      return;
+    }
+
+    console.log('Local commands differ from remote commands, syncing now.');
+    // await this.pushCommands(commands, appCommands);
+    console.log('Finished syncing');
   }
 
   async pushCommands(
@@ -46,7 +126,6 @@ export default class Client extends discord.Client {
         'Development environment detected..., using guild commands instead of application commands.'
       );
 
-      await this.clearAllCommands(guild);
       pushedCommands = await guild.commands
         .set(appCommands)
         .then((x) => [...x.values()]);
@@ -58,7 +137,7 @@ export default class Client extends discord.Client {
     }
 
     if (!pushedCommands) {
-      throw new Error('Could not push commands to server!');
+      return;
     }
 
     const fullPermissions: GuildApplicationCommandPermissionData[] =
@@ -81,15 +160,14 @@ export default class Client extends discord.Client {
     // Load all of the commands in.
     const commands = await loadCommands(dir);
 
-    // Get discord-compatible commands.
-    const appCommands = commands.map(toAppCommand);
-
-    if (!this.readyAt) {
+    if (!this.isReady()) {
       // Register commands to the discord API, once the client is ready.
-      this.once('ready', () => this.pushCommands(commands, appCommands));
+      this.once('ready', async () => {
+        await this.syncCommands(commands);
+      });
     } else {
       // If we get here the client is already ready, so we'll register immediately.
-      await this.pushCommands(commands, appCommands);
+      await this.syncCommands(commands);
     }
 
     // Enable dispatcher.
@@ -113,22 +191,6 @@ export default class Client extends discord.Client {
       */
     });
   }
-}
-
-/**
- * Converts a {@link Command} to an {@link ApplicationCommandData}.
- * @returns an {@link ApplicationCommandData}.
- */
-function toAppCommand(command: Command): ApplicationCommandData {
-  const defaultPermission: boolean =
-    (command.allowedRoles ?? command.allowedUsers) === undefined;
-
-  return {
-    name: command.name,
-    options: command.options,
-    description: command.description,
-    defaultPermission,
-  };
 }
 
 function generatePermissionData(
