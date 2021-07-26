@@ -12,7 +12,39 @@ import discord, {
 import { dispatch } from './dispatch';
 import { loadCommands } from './loadCommands';
 import { Command } from './Command';
+import { commandEquals } from './utils/command';
 
+function cleanOption(option: ApplicationCommandOptionData): ApplicationCommandOptionData {
+  if (!option.required) {
+    option.required = false; // Default for required
+  }
+
+  // These stubs are needed for deep comparisons
+  // because discord.js return values set to undefined.
+  if (!option.choices) {
+    option.choices = undefined;
+  }
+
+  if (!option.options) {
+    option.options = undefined;
+  } else {
+    // Recurse through sub options.
+    option.options.map(cleanOption);
+  }
+
+  return option;
+}
+
+function toData(command: ApplicationCommand | Command): ApplicationCommandData {
+
+  const newOptions = command.options?.map(cleanOption);
+
+  return {
+    name: command.name,
+    description: command.description,
+    options: newOptions ?? []
+  };
+}
 
 export default class Client extends discord.Client {
   /**
@@ -20,46 +52,9 @@ export default class Client extends discord.Client {
    */
   constructor(options: ClientOptions) {
     super(options);
-  }
+  }  
 
-  toData(command: ApplicationCommand | Command): ApplicationCommandData {
-    return {
-      name: command.name,
-      description: command.description,
-      options: command.options
-    };
-  }
-
-  commandEquals(command?: Command, appCommand?: ApplicationCommandData): boolean {
-
-    if (!command && !appCommand) {
-      return true;
-    }
-
-    if (!command || !appCommand) {
-      return false;
-    }
-
-    return command.name === appCommand.name &&
-    this.optionsEqual(command.options ?? [], appCommand.options ?? []) &&
-    command.description === appCommand.description;
-  }
-
-  optionsEqual(a: ApplicationCommandOptionData[], b: ApplicationCommandOptionData[]): boolean {
-
-    if (a.length !== b.length) {
-      return false;
-    }
-    
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return b.every((option, i) => this.optionEqual(option, a[i]!));
-  }
-
-  optionEqual(a: ApplicationCommandOptionData, b: ApplicationCommandOptionData): boolean {
-    return a.name === b.name &&
-    a.type === b.type &&
-    a.description === b.description;
-  }
+  
 
   // eslint-disable-next-line @typescript-eslint/require-await
   async syncCommands(commands: Command[]): Promise<void> {
@@ -75,17 +70,20 @@ export default class Client extends discord.Client {
       throw new Error('Could not fetch remote commands!');
     }
 
-    const appCommands = rawCommands.map(this.toData);
+    const appCommands = rawCommands.map(toData);
+    const clientCommands = commands.map(toData);
+
+    console.log(JSON.stringify(appCommands));
 
     // If the length is not the same it's obvious that the commands aren't the same.
     if (appCommands.length !== commands.length) {
       console.log({rawCommands: rawCommands.size, commands: commands.length});
       console.log('Local commands differ from remote commands, syncing now...');
-      // await this.pushCommands(commands, commands);
+      await this.pushCommands(commands);
       console.log('Finished syncing');
       return;
     }
-    const diff = appCommands.every((appCommand, i) => this.commandEquals(commands[i], appCommand));
+    const diff = appCommands.every((appCommand, i) => commandEquals(clientCommands[i], appCommand));
 
     if (diff) {
       console.log('Commands are already in sync, nothing to push...');
@@ -93,12 +91,11 @@ export default class Client extends discord.Client {
     }
 
     console.log('Local commands differ from remote commands, syncing now.');
-    // await this.pushCommands(commands, appCommands);
+    await this.pushCommands(commands);
     console.log('Finished syncing');
   }
 
   async pushCommands(
-    commands: Command[],
     appCommands: ApplicationCommandData[]
   ): Promise<void> {
     let guild: Guild | undefined = undefined;
@@ -137,11 +134,11 @@ export default class Client extends discord.Client {
       return;
     }
 
-    const fullPermissions: GuildApplicationCommandPermissionData[] =
-      generatePermissionData(pushedCommands, commands);
+    // const fullPermissions: GuildApplicationCommandPermissionData[] =
+    //   generatePermissionData(pushedCommands, commands);
 
     // Apply Permissions (per-guild-only)
-    await guild.commands.permissions.set({ fullPermissions });
+    // await guild.commands.permissions.set({ fullPermissions });
   }
 
   private async clearAllCommands(guild: Guild) {
