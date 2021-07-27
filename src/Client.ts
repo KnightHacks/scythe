@@ -14,7 +14,6 @@ import { loadCommands } from './loadCommands';
 import { Command } from './Command';
 import { commandEquals, toData } from './utils/command';
 
-
 export default class Client extends discord.Client {
 
   private commands = new Collection<string, Command>();
@@ -32,16 +31,28 @@ export default class Client extends discord.Client {
       throw new Error('This must be used after the client is ready.');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const rawCommands = process.env.NODE_ENV === 'development' ?  await this.guilds.cache.get(process.env.GUILD_ID!)?.commands.fetch() : await this.application.commands.fetch();
+    if (!process.env.GUILD_ID) {
+      throw new Error('Please set the GUILD_ID in your .env file.');
+    }
+
+    // Fetch the commands from the server.
+    const rawCommands = process.env.NODE_ENV === 'development' ?  
+      await this.guilds.cache.get(process.env.GUILD_ID)?.commands.fetch() : 
+      await this.application.commands.fetch();
 
     if (!rawCommands) {
       throw new Error('Could not fetch remote commands!');
     }
 
-    const appCommands = rawCommands.map(toData);
-    const clientCommands = commands.map(toData);
+    // Normalize all of the commands.
 
+    const appCommands = new Collection<string, ApplicationCommandData>();
+    rawCommands.map(toData).forEach(data => appCommands.set(data.name, data));
+
+    const clientCommands = new Collection<string, ApplicationCommandData>();
+    commands.map(toData).forEach(data => clientCommands.set(data.name, data));
+
+    // Helper for whenever there's a diff.
     const push = async () => {
       console.log('Local commands differ from remote commands, syncing now...');
       await this.pushCommands(commands);
@@ -49,13 +60,25 @@ export default class Client extends discord.Client {
     };
 
     // If the length is not the same it's obvious that the commands aren't the same.
-    if (appCommands.length !== commands.length) {
+    if (appCommands.size !== clientCommands.size) {
+      console.log({ appCommands: appCommands.size, commands: clientCommands.size });
       await push();
       return;
     }
-    const diff = appCommands.every((appCommand, i) => commandEquals(clientCommands[i], appCommand));
 
-    if (diff) {
+
+    // Calculate if theres a diff between the local and remote commands.
+    const diff = !appCommands.every(appCommand => {
+      // Get the name, and get the corresponding command with the same name.
+      const { name } = appCommand;
+      const clientCommand = clientCommands.get(name);
+
+      // Check if the commands are equal.
+      return commandEquals(clientCommand, appCommand);
+    });
+
+    // There's no diff then the commands are in sync.
+    if (!diff) {
       console.log('Commands are already in sync, nothing to push...');
       return;
     }
