@@ -38,14 +38,9 @@ export async function dispatch(
     }
   }
 
-  if (process.env.NODE_ENV === 'production') {
-    try {
-      console.log('got here');
-      await command.run(interaction);
-    } catch(error) {
-      console.error(error);
-    }
-  } else {
+  try {
     await command.run(interaction);
+  } catch(error) {
+    console.error(error);
   }
 }
