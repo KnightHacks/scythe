@@ -26,10 +26,29 @@ export type LinkButtonOptions = {
 
 export class DispatchButton {
   constructor(readonly options: ButtonOptions) {}
+
+  toDiscordComponent(
+    buttonListeners: Map<string, ButtonHandler>
+  ): MessageButtonOptions {
+    const { onClick, ...options } = this.options;
+    // nonlink buttons must have a customId
+    const id = getID(this.options.label ?? '<unlabeled>', 'button');
+    buttonListeners.set(id, onClick);
+    return { ...options, type: 'BUTTON', customId: id };
+  }
 }
 
 export class DispatchLinkButton {
   constructor(readonly options: LinkButtonOptions) {}
+
+  toDiscordComponent(): MessageButtonOptions {
+    // we override style in case the user omitted it
+    return {
+      ...this.options,
+      type: 'BUTTON',
+      style: 'LINK',
+    };
+  }
 }
 
 export function toComponents(
@@ -38,24 +57,7 @@ export function toComponents(
 ): MessageActionRow[] {
   const normalizedUI = normalizeUI(components);
   const configInRows: MessageButtonOptions[][] = normalizedUI.map((row) =>
-    row.map((component) => {
-      if (component instanceof DispatchButton) {
-        const { onClick, ...options } = component.options;
-        // nonlink buttons must have a customId
-        const id = getID(component.options.label ?? '<unlabeled>', 'button');
-        buttonListeners.set(id, onClick);
-        return { ...options, type: 'BUTTON', customId: id };
-      } else if (component instanceof DispatchLinkButton) {
-        // we override style in case the user omitted it
-        return {
-          ...component.options,
-          type: 'BUTTON',
-          style: 'LINK',
-        };
-      } else {
-        throw new Error('No such component type!');
-      }
-    })
+    row.map((component) => component.toDiscordComponent(buttonListeners))
   );
   return configInRows.map((row) =>
     new MessageActionRow().addComponents(...row)
