@@ -9,10 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export type UIComponent = DispatchButton | DispatchLinkButton;
 
-export type ButtonOptions = {
-  disabled?: boolean;
-  emoji?: EmojiIdentifierResolvable;
-  label?: string;
+export type ButtonOptions = Omit<MessageButtonOptions, 'customId' | 'style' | 'url'> & {
   style: Exclude<MessageButtonStyleResolvable, 'LINK'>;
   onClick: ButtonHandler;
 };
