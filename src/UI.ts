@@ -34,31 +34,27 @@ export class DispatchLinkButton {
 
 export function toComponents(
   components: UIComponent[][],
-  buttonListeners: Map<string, ButtonHandler>,
+  buttonListeners: Map<string, ButtonHandler>
 ): MessageActionRow[] {
-  const configInRows: MessageButtonOptions[][] = components.map(
-    (row) =>
-      row.map((component) => {
-        if (component instanceof DispatchButton) {
-          const { onClick, ...options } = component.options;
-          // nonlink buttons must have a customId
-          const id = getID(
-            component.options.label ?? '<unlabeled>',
-            'button'
-          );
-          buttonListeners.set(id, onClick);
-          return { ...options, type: 'BUTTON', customId: id };
-        } else if (component instanceof DispatchLinkButton) {
-          // we override style in case the user omitted it
-          return {
-            ...component.options,
-            type: 'BUTTON',
-            style: 'LINK'
-          };
-        } else {
-          throw new Error('No such component type!');
-        }
-      })
+  const configInRows: MessageButtonOptions[][] = components.map((row) =>
+    row.map((component) => {
+      if (component instanceof DispatchButton) {
+        const { onClick, ...options } = component.options;
+        // nonlink buttons must have a customId
+        const id = getID(component.options.label ?? '<unlabeled>', 'button');
+        buttonListeners.set(id, onClick);
+        return { ...options, type: 'BUTTON', customId: id };
+      } else if (component instanceof DispatchLinkButton) {
+        // we override style in case the user omitted it
+        return {
+          ...component.options,
+          type: 'BUTTON',
+          style: 'LINK',
+        };
+      } else {
+        throw new Error('No such component type!');
+      }
+    })
   );
   return configInRows.map((row) =>
     new MessageActionRow().addComponents(...row)
