@@ -33,8 +33,8 @@ export interface Command {
    * The function that gets executed after the command is invoked.
    * @param args
    * @param args.interaction Interaction object from discord.js
-   * @param args.registerUI **Must be called once per message!** Generates a
-   * discord.js compatible UI from Dispatch components.
+   * @param args.registerUI **Must be called at most once per message!**
+   * Generates a discord.js compatible UI from Dispatch components.
    */
   run({
     interaction,
