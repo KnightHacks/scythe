@@ -127,9 +127,9 @@ export default class Client extends discord.Client {
    * @param ui Either a single `UIComponent` or a 1D or 2D array of `UIComponent`s
    * @returns a generated `MessageActionRow[]`
    */
-  registerUI(
+  registerUI = (
     ui: UIComponent | UIComponent[] | UIComponent[][]
-  ): MessageActionRow[] {
+  ): MessageActionRow[] => {
     /*
      * We allow the user to pass in a single UI element, a row of elements, or
      * multiple rows of elements.
@@ -150,7 +150,7 @@ export default class Client extends discord.Client {
         return toComponents(this, [ui as UIComponent[]]);
       }
     }
-  }
+  };
 }
 
 /**
