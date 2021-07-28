@@ -114,7 +114,7 @@ export default class Client extends discord.Client {
         }
 
         // Run handler.
-        handler(interaction, this);
+        handler(interaction);
       }
     });
   }
