@@ -9,12 +9,18 @@ import { v4 as uuidv4 } from 'uuid';
 
 export type UIComponent = DispatchButton | DispatchLinkButton;
 
-export type ButtonOptions = Omit<MessageButtonOptions, 'customId' | 'style' | 'url'> & {
+export type ButtonOptions = Omit<
+  MessageButtonOptions,
+  'customId' | 'style' | 'url'
+> & {
   style: Exclude<MessageButtonStyleResolvable, 'LINK'>;
   onClick: ButtonHandler;
 };
 
-export type LinkButtonOptions = Omit<MessageButtonOptions, 'customId' | 'style' | 'url'> & {
+export type LinkButtonOptions = Omit<
+  MessageButtonOptions,
+  'customId' | 'style' | 'url'
+> & {
   url: string;
 };
 
@@ -56,8 +62,10 @@ export function toComponents(
   // validate row constraints
   configInRows.forEach((row) => {
     if (row.length > 5) {
-      throw new Error('Rows cannot have more than 5 elements!\n' +
-                     `Row containing "${row.map(x => x.label).join(' ')}" is invalid.`);
+      throw new Error(
+        'Rows cannot have more than 5 elements!\n' +
+          `Row containing "${row.map((x) => x.label).join(' ')}" is invalid.`
+      );
     }
   });
   return configInRows.map((row) =>
