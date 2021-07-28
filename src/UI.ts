@@ -5,7 +5,6 @@ import {
   MessageButtonStyleResolvable,
 } from 'discord.js';
 import { ButtonHandler } from './ButtonHandler';
-import Client from './Client';
 import { v4 as uuidv4 } from 'uuid';
 
 export type UIComponent = DispatchButton | DispatchLinkButton;
@@ -34,8 +33,8 @@ export class DispatchLinkButton {
 }
 
 export function toComponents(
-  client: Client,
-  components: UIComponent[][]
+  components: UIComponent[][],
+  buttonListeners: Map<string, ButtonHandler>,
 ): MessageActionRow[] {
   const configInRows: MessageButtonOptions[][] = components.map(
     (row) =>
@@ -47,7 +46,7 @@ export function toComponents(
             component.options.label ?? '<unlabeled>',
             'button'
           );
-          client.buttonListeners.set(id, onClick);
+          buttonListeners.set(id, onClick);
           return { ...options, type: 'BUTTON', customId: id };
         } else if (component instanceof DispatchLinkButton) {
           // we override style in case the user omitted it
