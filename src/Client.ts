@@ -106,7 +106,6 @@ export default class Client extends discord.Client {
         dispatch(interaction, commands, this);
       }
 
-      // FIXME figure out a button/select menu api that
       if (interaction instanceof ButtonInteraction) {
         const handler = this.buttonListeners.get(interaction.customId);
 
