@@ -14,10 +14,7 @@ export type ButtonOptions = Omit<MessageButtonOptions, 'customId' | 'style' | 'u
   onClick: ButtonHandler;
 };
 
-export type LinkButtonOptions = {
-  disabled?: boolean;
-  emoji?: EmojiIdentifierResolvable;
-  label?: string;
+export type LinkButtonOptions = Omit<MessageButtonOptions, 'customId' | 'style' | 'url'> & {
   url: string;
 };
 
