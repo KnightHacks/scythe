@@ -33,10 +33,11 @@ export class DispatchLinkButton {
 }
 
 export function toComponents(
-  components: UIComponent[][],
+  components: UIComponent | UIComponent[] | UIComponent[][],
   buttonListeners: Map<string, ButtonHandler>
 ): MessageActionRow[] {
-  const configInRows: MessageButtonOptions[][] = components.map((row) =>
+  const normalizedUI = normalizeUI(components);
+  const configInRows: MessageButtonOptions[][] = normalizedUI.map((row) =>
     row.map((component) => {
       if (component instanceof DispatchButton) {
         const { onClick, ...options } = component.options;
@@ -64,4 +65,29 @@ export function toComponents(
 function getID(label: string, componentType: string): string {
   const uuid: string = uuidv4();
   return `${label}$${componentType}$${uuid}`;
+}
+
+function normalizeUI(
+  ui: UIComponent | UIComponent[] | UIComponent[][]
+): UIComponent[][] {
+  /*
+   * We allow the user to pass in a single UI element, a row of elements, or
+   * multiple rows of elements.
+   */
+  if (!Array.isArray(ui)) {
+    // single item, so we need to wrap in [][] because toComponents expects a UIComponent[][]
+    return [[ui]];
+  } else {
+    const maybeArray: UIComponent | UIComponent[] | undefined = ui[0];
+    if (maybeArray === undefined) {
+      // we had an empty single array
+      return [[]];
+    } else if (Array.isArray(maybeArray)) {
+      // we cast because it must be a 2d array
+      return ui as UIComponent[][];
+    } else {
+      // only a 1d array, so wrap in an array once
+      return [ui as UIComponent[]];
+    }
+  }
 }

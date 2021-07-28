@@ -130,26 +130,7 @@ export default class Client extends discord.Client {
   registerUI = (
     ui: UIComponent | UIComponent[] | UIComponent[][]
   ): MessageActionRow[] => {
-    /*
-     * We allow the user to pass in a single UI element, a row of elements, or
-     * multiple rows of elements.
-     */
-    if (!Array.isArray(ui)) {
-      // single item, so we need to wrap in [][] because toComponents expects a UIComponent[][]
-      return toComponents([[ui]], this.buttonListeners);
-    } else {
-      const maybeArray: UIComponent | UIComponent[] | undefined = ui[0];
-      if (maybeArray === undefined) {
-        // we had an empty single array
-        return toComponents([[]], this.buttonListeners);
-      } else if (Array.isArray(maybeArray)) {
-        // we cast because it must be a 2d array
-        return toComponents(ui as UIComponent[][], this.buttonListeners);
-      } else {
-        // only a 1d array, so wrap in an array once
-        return toComponents([ui as UIComponent[]], this.buttonListeners);
-      }
-    }
+    return toComponents(ui, this.buttonListeners);
   };
 }
 
