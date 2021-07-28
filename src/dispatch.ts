@@ -41,7 +41,7 @@ export async function dispatch(
   }
 
   try {
-    await command.run(interaction, client);
+    await command.run({ interaction, client });
   } catch(error) {
     console.error(error);
   }
