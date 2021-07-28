@@ -41,8 +41,8 @@ export async function dispatch(
   }
 
   try {
-    await command.run({ interaction, client });
-  } catch(error) {
+    await command.run({ interaction, registerUI: client.registerUI });
+  } catch (error) {
     console.error(error);
   }
 }
