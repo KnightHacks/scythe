@@ -12,7 +12,8 @@ import discord, {
 import { dispatch } from './dispatch';
 import { loadCommands } from './loadCommands';
 import { Command } from './Command';
-import { commandEquals, toData } from './utils/command';
+import { toData } from './utils/command';
+import { isEqual } from 'lodash';
 
 export default class Client extends discord.Client {
 
@@ -71,9 +72,9 @@ export default class Client extends discord.Client {
     const diff = !appCommands.every(appCommand => {
       // Get the name, and get the corresponding command with the same name.
       const clientCommand = clientCommands.get(appCommand.name);
-
+      
       // Check if the commands are equal.
-      return commandEquals(clientCommand, appCommand);
+      return isEqual(clientCommand, appCommand);
     });
 
     // There's no diff then the commands are in sync.
