@@ -44,7 +44,5 @@ export function commandEquals(a?: ApplicationCommandData, b?: ApplicationCommand
     return false;
   }
 
-  return a.name === b.name &&
-    isEqual(a.options, b.options) &&
-    a.description === b.description;
+  return isEqual(a, b);
 }

@@ -70,8 +70,7 @@ export default class Client extends discord.Client {
     // Calculate if theres a diff between the local and remote commands.
     const diff = !appCommands.every(appCommand => {
       // Get the name, and get the corresponding command with the same name.
-      const { name } = appCommand;
-      const clientCommand = clientCommands.get(name);
+      const clientCommand = clientCommands.get(appCommand.name);
 
       // Check if the commands are equal.
       return commandEquals(clientCommand, appCommand);
