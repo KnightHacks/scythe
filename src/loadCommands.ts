@@ -26,7 +26,6 @@ export async function loadCommands(dir: string, recursive = true): Promise<Comma
   for await (const file of files) {
     // Create the absolute path for import statements.
     const importPath = path.join(dir, file);
-    console.log(importPath);
     const isDirectory = (await fs.lstat(importPath)).isDirectory();
 
     // Check if directory, if it is, recurse.

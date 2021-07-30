@@ -134,10 +134,11 @@ export default class Client extends discord.Client {
   /**
    * Registers the commands to be used by this client.
    * @param dir The directory to load commands from.
+   * @param recursive Whether or not to look for commands recursively.
    */
-  async registerCommands(dir: string): Promise<void> {
+  async registerCommands(dir: string, recursive = true): Promise<void> {
     // Load all of the commands in.
-    const commands = await loadCommands(dir);
+    const commands = await loadCommands(dir, recursive);
 
     commands.forEach(command => {
       this.commands.set(command.name, command);
