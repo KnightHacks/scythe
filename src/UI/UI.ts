@@ -4,10 +4,10 @@ import {
   MessageSelectMenuOptions,
 } from 'discord.js';
 import { v4 as uuidv4 } from 'uuid';
-import { ButtonHandler, Button } from './Button';
-import { DispatchSelectMenu, SelectMenuHandler } from './DispatchSelectMenu';
+import { ButtonHandler, ButtonOptions, LinkButtonOptions, toDiscordComponent } from './Button';
+import { SelectMenuHandler, SelectMenuOptions } from './DispatchSelectMenu';
 
-export type UIComponent = Button | DispatchSelectMenu;
+export type UIComponent = ButtonOptions | LinkButtonOptions | SelectMenuOptions;
 
 export function toComponents(
   components: UIComponent | UIComponent[] | UIComponent[][],
@@ -18,7 +18,7 @@ export function toComponents(
   const configInRows: (MessageButtonOptions | MessageSelectMenuOptions)[][] =
     normalizedUI.map((row) =>
       row.map((component) =>
-        component.toDiscordComponent({ buttonListeners, selectMenuListeners })
+        toDiscordComponent(component, buttonListeners, selectMenuListeners)
       )
     );
   // validate row constraints

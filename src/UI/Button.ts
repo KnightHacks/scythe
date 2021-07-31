@@ -2,8 +2,10 @@ import {
   ButtonInteraction,
   MessageButtonOptions,
   MessageButtonStyle,
+  MessageSelectMenuOptions,
 } from 'discord.js';
-import { getID } from './UI';
+import { SelectMenuHandler } from './DispatchSelectMenu';
+import { getID, UIComponent } from './UI';
 
 export type ButtonHandler = (
   interaction: ButtonInteraction
@@ -19,30 +21,49 @@ export type LinkButtonOptions = MessageButtonOptions & {
 };
 
 function isLinkButtonOptions(
-  options: LinkButtonOptions | ButtonOptions
+  options: UIComponent
 ): options is LinkButtonOptions {
-  return options.style === 'LINK';
+  return 'url' in options && 'style' in options && options.style === 'LINK';
 }
 
-export class Button {
-  constructor(readonly options: ButtonOptions | LinkButtonOptions) {}
+function isRegularButtonOptions(
+  options: UIComponent
+): options is ButtonOptions {
+  return 'onClick' in options && 'style' in options;
+}
 
-  toDiscordComponent({
-    buttonListeners,
-  }: {
-    buttonListeners: Map<string, ButtonHandler>;
-  }): MessageButtonOptions {
-    if (isLinkButtonOptions(this.options)) {
-      return {
-        ...this.options,
-        type: 'BUTTON',
-      };
-    } else {
-      const { onClick, ...options } = this.options;
-      // nonlink buttons must have a customId
-      const id = getID(options.label ?? '<unlabeled>', 'button');
-      buttonListeners.set(id, onClick);
-      return { ...options, type: 'BUTTON', customId: id };
-    }
+/* for future use if more types are needed
+function isSelectMenuOptions(
+  options: UIComponent
+): options is SelectMenuOptions {
+  return 'onSelect' in options;
+}
+*/
+
+export function toDiscordComponent(
+  options: UIComponent,
+  buttonListeners: Map<string, ButtonHandler>,
+  selectMenuListeners: Map<string, SelectMenuHandler>
+): MessageButtonOptions | MessageSelectMenuOptions {
+  if (isLinkButtonOptions(options)) {
+    return {
+      ...options,
+      type: 'BUTTON',
+    };
+  } else if (isRegularButtonOptions(options)) {
+    // nonlink buttons must have a customId
+    const { onClick, ...buttonOptions } = options;
+    const id = getID(options.label ?? '<unlabeled>', 'button');
+    buttonListeners.set(id, onClick);
+    return { ...buttonOptions, type: 'BUTTON', customId: id };
+  } else {
+    const { onSelect, ...selectOptions } = options;
+    const id = getID(selectOptions.placeholder ?? '<noplaceholder>', 'select');
+    selectMenuListeners.set(id, onSelect);
+    return {
+      ...selectOptions,
+      type: 'SELECT_MENU',
+      customId: id,
+    };
   }
 }
