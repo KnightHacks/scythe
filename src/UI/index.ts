@@ -1,3 +1,3 @@
 export * from './Button';
-export * from './DispatchSelectMenu';
+export * from './SelectMenu';
 export { toComponents, UIComponent } from './UI';

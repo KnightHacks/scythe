@@ -11,7 +11,7 @@ import {
   isRegularButtonOptions,
   LinkButtonOptions,
 } from './Button';
-import { SelectMenuHandler, SelectMenuOptions } from './DispatchSelectMenu';
+import { SelectMenuHandler, SelectMenuOptions } from './SelectMenu';
 
 export type UIComponent = ButtonOptions | LinkButtonOptions | SelectMenuOptions;
 
