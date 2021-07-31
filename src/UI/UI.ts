@@ -59,7 +59,7 @@ function validateMaxLength(
   }
 }
 
-export function getID(label: string, componentType: string): string {
+function getID(label: string, componentType: string): string {
   const uuid: string = uuidv4();
   return `${label}$${componentType}$${uuid}`;
 }
