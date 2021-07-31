@@ -1,6 +1,7 @@
 import {
   ApplicationCommandOptionData,
   CommandInteraction,
+  Guild,
   MessageActionRow,
   Snowflake,
 } from 'discord.js';
@@ -39,11 +40,13 @@ export interface Command {
   run({
     interaction,
     registerUI,
+    guild,
   }: {
     interaction: CommandInteraction;
     registerUI: (
       ui: UIComponent | UIComponent[] | UIComponent[][]
     ) => MessageActionRow[];
+    guild: Guild;
   }): Promise<void> | void;
 
   /**
