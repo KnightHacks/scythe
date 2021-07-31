@@ -4,14 +4,10 @@ import {
   MessageSelectMenuOptions,
 } from 'discord.js';
 import { v4 as uuidv4 } from 'uuid';
-import { ButtonHandler, DispatchButton } from './DispatchButton';
-import { DispatchLinkButton } from './DispatchLinkButton';
+import { ButtonHandler, Button } from './Button';
 import { DispatchSelectMenu, SelectMenuHandler } from './DispatchSelectMenu';
 
-export type UIComponent =
-  | DispatchButton
-  | DispatchLinkButton
-  | DispatchSelectMenu;
+export type UIComponent = Button | DispatchSelectMenu;
 
 export function toComponents(
   components: UIComponent | UIComponent[] | UIComponent[][],
