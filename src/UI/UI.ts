@@ -1,87 +1,17 @@
 import {
   MessageActionRow,
   MessageButtonOptions,
-  MessageButtonStyleResolvable,
   MessageSelectMenuOptions,
-  SelectMenuInteraction,
 } from 'discord.js';
-import { ButtonHandler } from './ButtonHandler';
 import { v4 as uuidv4 } from 'uuid';
+import { ButtonHandler, DispatchButton } from './DispatchButton';
+import { DispatchLinkButton } from './DispatchLinkButton';
+import { DispatchSelectMenu, SelectMenuHandler } from './DispatchSelectMenu';
 
 export type UIComponent =
   | DispatchButton
   | DispatchLinkButton
   | DispatchSelectMenu;
-
-export type ButtonOptions = Omit<
-  MessageButtonOptions,
-  'customId' | 'style' | 'url'
-> & {
-  style: Exclude<MessageButtonStyleResolvable, 'LINK'>;
-  onClick: ButtonHandler;
-};
-
-export type LinkButtonOptions = Omit<
-  MessageButtonOptions,
-  'customId' | 'style' | 'url'
-> & {
-  url: string;
-};
-
-export class DispatchButton {
-  constructor(readonly options: ButtonOptions) {}
-
-  toDiscordComponent({
-    buttonListeners,
-  }: {
-    buttonListeners: Map<string, ButtonHandler>;
-  }): MessageButtonOptions {
-    const { onClick, ...options } = this.options;
-    // nonlink buttons must have a customId
-    const id = getID(this.options.label ?? '<unlabeled>', 'button');
-    buttonListeners.set(id, onClick);
-    return { ...options, type: 'BUTTON', customId: id };
-  }
-}
-
-export class DispatchLinkButton {
-  constructor(readonly options: LinkButtonOptions) {}
-
-  toDiscordComponent(): MessageButtonOptions {
-    // we override style in case the user omitted it
-    return {
-      ...this.options,
-      type: 'BUTTON',
-      style: 'LINK',
-    };
-  }
-}
-
-export type SelectMenuOptions = Omit<MessageSelectMenuOptions, 'customId'> & {
-  onSelect: SelectMenuHandler;
-};
-export type SelectMenuHandler = (
-  interaction: SelectMenuInteraction
-) => void | Promise<void>;
-
-export class DispatchSelectMenu {
-  constructor(readonly options: SelectMenuOptions) {}
-
-  toDiscordComponent({
-    selectMenuListeners,
-  }: {
-    selectMenuListeners: Map<string, SelectMenuHandler>;
-  }): MessageSelectMenuOptions {
-    const { onSelect, ...options } = this.options;
-    const id = getID(this.options.placeholder ?? '<noplaceholder>', 'select');
-    selectMenuListeners.set(id, onSelect);
-    return {
-      ...options,
-      type: 'SELECT_MENU',
-      customId: id,
-    };
-  }
-}
 
 export function toComponents(
   components: UIComponent | UIComponent[] | UIComponent[][],
@@ -127,7 +57,7 @@ function validateMaxLength(
   }
 }
 
-function getID(label: string, componentType: string): string {
+export function getID(label: string, componentType: string): string {
   const uuid: string = uuidv4();
   return `${label}$${componentType}$${uuid}`;
 }

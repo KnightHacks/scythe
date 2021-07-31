@@ -14,8 +14,7 @@ import discord, {
 import { dispatch } from './dispatch';
 import { loadCommands } from './loadCommands';
 import { Command } from './Command';
-import { ButtonHandler } from './ButtonHandler';
-import { SelectMenuHandler, toComponents, UIComponent } from './UI';
+import { ButtonHandler, SelectMenuHandler, toComponents, UIComponent } from './UI';
 
 export default class Client extends discord.Client {
   /**
