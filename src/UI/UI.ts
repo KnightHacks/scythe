@@ -15,7 +15,7 @@ import { SelectMenuHandler, SelectMenuOptions } from './SelectMenu';
 
 export type UIComponent = ButtonOptions | LinkButtonOptions | SelectMenuOptions;
 
-export function toComponents(
+export function toDiscordUI(
   components: UIComponent | UIComponent[] | UIComponent[][],
   buttonListeners: Map<string, ButtonHandler>,
   selectMenuListeners: Map<string, SelectMenuHandler>

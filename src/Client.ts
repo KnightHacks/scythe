@@ -14,7 +14,7 @@ import discord, {
 import { dispatch } from './dispatch';
 import { loadCommands } from './loadCommands';
 import { Command } from './Command';
-import { ButtonHandler, SelectMenuHandler, toComponents, UIComponent } from './UI';
+import { ButtonHandler, SelectMenuHandler, toDiscordUI, UIComponent } from './UI';
 
 export default class Client extends discord.Client {
   /**
@@ -145,7 +145,7 @@ export default class Client extends discord.Client {
   registerUI = (
     ui: UIComponent | UIComponent[] | UIComponent[][]
   ): MessageActionRow[] => {
-    return toComponents(ui, this.buttonListeners, this.selectMenuListeners);
+    return toDiscordUI(ui, this.buttonListeners, this.selectMenuListeners);
   };
 }
 
