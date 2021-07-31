@@ -2,11 +2,16 @@ import {
   MessageActionRow,
   MessageButtonOptions,
   MessageButtonStyleResolvable,
+  MessageSelectMenuOptions,
+  SelectMenuInteraction,
 } from 'discord.js';
 import { ButtonHandler } from './ButtonHandler';
 import { v4 as uuidv4 } from 'uuid';
 
-export type UIComponent = DispatchButton | DispatchLinkButton;
+export type UIComponent =
+  | DispatchButton
+  | DispatchLinkButton
+  | DispatchSelectMenu;
 
 export type ButtonOptions = Omit<
   MessageButtonOptions,
@@ -26,9 +31,11 @@ export type LinkButtonOptions = Omit<
 export class DispatchButton {
   constructor(readonly options: ButtonOptions) {}
 
-  toDiscordComponent(
-    buttonListeners: Map<string, ButtonHandler>
-  ): MessageButtonOptions {
+  toDiscordComponent({
+    buttonListeners,
+  }: {
+    buttonListeners: Map<string, ButtonHandler>;
+  }): MessageButtonOptions {
     const { onClick, ...options } = this.options;
     // nonlink buttons must have a customId
     const id = getID(this.options.label ?? '<unlabeled>', 'button');
@@ -50,20 +57,58 @@ export class DispatchLinkButton {
   }
 }
 
+export type SelectMenuOptions = Omit<MessageSelectMenuOptions, 'customId'> & {
+  onSelect: SelectMenuHandler;
+};
+export type SelectMenuHandler = (
+  interaction: SelectMenuInteraction
+) => void | Promise<void>;
+
+export class DispatchSelectMenu {
+  constructor(readonly options: SelectMenuOptions) {}
+
+  toDiscordComponent({
+    selectMenuListeners,
+  }: {
+    selectMenuListeners: Map<string, SelectMenuHandler>;
+  }): MessageSelectMenuOptions {
+    const { onSelect, ...options } = this.options;
+    const id = getID(this.options.placeholder ?? '<noplaceholder>', 'select');
+    selectMenuListeners.set(id, onSelect);
+    return {
+      ...options,
+      type: 'SELECT_MENU',
+      customId: id,
+    };
+  }
+}
+
 export function toComponents(
   components: UIComponent | UIComponent[] | UIComponent[][],
-  buttonListeners: Map<string, ButtonHandler>
+  buttonListeners: Map<string, ButtonHandler>,
+  selectMenuListeners: Map<string, SelectMenuHandler>
 ): MessageActionRow[] {
   const normalizedUI = normalizeUI(components);
-  const configInRows: MessageButtonOptions[][] = normalizedUI.map((row) =>
-    row.map((component) => component.toDiscordComponent(buttonListeners))
-  );
+  const configInRows: (MessageButtonOptions | MessageSelectMenuOptions)[][] =
+    normalizedUI.map((row) =>
+      row.map((component) =>
+        component.toDiscordComponent({ buttonListeners, selectMenuListeners })
+      )
+    );
   // validate row constraints
   configInRows.forEach((row) => {
+    if (row.find((config) => config.type === 'SELECT_MENU') && row.length > 1) {
+      throw new Error(
+        'Rows with select menus cannot contain other elements!'
+      );
+    }
     if (row.length > 5) {
       throw new Error(
         'Rows cannot have more than 5 elements!\n' +
-          `Row containing "${row.map((x) => x.label).join(' ')}" is invalid.`
+          // this cast should be safe as the above if covers select menus in rows
+          `Row containing "${row
+            .map((x) => (x as MessageButtonOptions).label)
+            .join(' ')}" is invalid.`
       );
     }
   });

@@ -8,13 +8,14 @@ import discord, {
   Guild,
   GuildApplicationCommandPermissionData,
   MessageActionRow,
+  SelectMenuInteraction,
   Snowflake,
 } from 'discord.js';
 import { dispatch } from './dispatch';
 import { loadCommands } from './loadCommands';
 import { Command } from './Command';
 import { ButtonHandler } from './ButtonHandler';
-import { toComponents, UIComponent } from './UI';
+import { SelectMenuHandler, toComponents, UIComponent } from './UI';
 
 export default class Client extends discord.Client {
   /**
@@ -22,6 +23,11 @@ export default class Client extends discord.Client {
    * button click handlers.
    */
   buttonListeners: Map<string, ButtonHandler> = new Map();
+  /**
+   * A map from select menu IDs to handler functions. This is used to implement
+   * select click handlers.
+   */
+  selectMenuListeners: Map<string, SelectMenuHandler> = new Map();
 
   /**
    * Handles commands for the bot.
@@ -116,6 +122,16 @@ export default class Client extends discord.Client {
         // Run handler.
         handler(interaction);
       }
+
+      if (interaction instanceof SelectMenuInteraction) {
+        const handler = this.selectMenuListeners.get(interaction.customId);
+
+        if (!handler) {
+          return;
+        }
+
+        handler(interaction);
+      }
     });
   }
 
@@ -130,7 +146,7 @@ export default class Client extends discord.Client {
   registerUI = (
     ui: UIComponent | UIComponent[] | UIComponent[][]
   ): MessageActionRow[] => {
-    return toComponents(ui, this.buttonListeners);
+    return toComponents(ui, this.buttonListeners, this.selectMenuListeners);
   };
 }
 
