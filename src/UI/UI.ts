@@ -4,7 +4,13 @@ import {
   MessageSelectMenuOptions,
 } from 'discord.js';
 import { v4 as uuidv4 } from 'uuid';
-import { ButtonHandler, ButtonOptions, LinkButtonOptions, toDiscordComponent } from './Button';
+import {
+  ButtonHandler,
+  ButtonOptions,
+  isLinkButtonOptions,
+  isRegularButtonOptions,
+  LinkButtonOptions,
+} from './Button';
 import { SelectMenuHandler, SelectMenuOptions } from './DispatchSelectMenu';
 
 export type UIComponent = ButtonOptions | LinkButtonOptions | SelectMenuOptions;
@@ -80,5 +86,33 @@ function normalizeUI(
       // only a 1d array, so wrap in an array once
       return [ui as UIComponent[]];
     }
+  }
+}
+
+function toDiscordComponent(
+  options: UIComponent,
+  buttonListeners: Map<string, ButtonHandler>,
+  selectMenuListeners: Map<string, SelectMenuHandler>
+): MessageButtonOptions | MessageSelectMenuOptions {
+  if (isLinkButtonOptions(options)) {
+    return {
+      ...options,
+      type: 'BUTTON',
+    };
+  } else if (isRegularButtonOptions(options)) {
+    // nonlink buttons must have a customId
+    const { onClick, ...buttonOptions } = options;
+    const id = getID(options.label ?? '<unlabeled>', 'button');
+    buttonListeners.set(id, onClick);
+    return { ...buttonOptions, type: 'BUTTON', customId: id };
+  } else {
+    const { onSelect, ...selectOptions } = options;
+    const id = getID(selectOptions.placeholder ?? '<noplaceholder>', 'select');
+    selectMenuListeners.set(id, onSelect);
+    return {
+      ...selectOptions,
+      type: 'SELECT_MENU',
+      customId: id,
+    };
   }
 }
