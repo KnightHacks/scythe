@@ -29,11 +29,3 @@ export function isRegularButtonOptions(
 ): options is ButtonOptions {
   return 'onClick' in options && 'style' in options;
 }
-
-/* for future use if more types are needed
-function isSelectMenuOptions(
-  options: UIComponent
-): options is SelectMenuOptions {
-  return 'onSelect' in options;
-}
-*/
