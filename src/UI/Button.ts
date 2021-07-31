@@ -1,27 +1,21 @@
 import {
-  BaseButtonOptions,
   ButtonInteraction,
   MessageButtonOptions,
-  MessageButtonStyleResolvable,
+  MessageButtonStyle,
 } from 'discord.js';
-import { MessageButtonStyles } from 'discord.js/typings/enums';
 import { getID } from './UI';
 
 export type ButtonHandler = (
   interaction: ButtonInteraction
 ) => void | Promise<void>;
 
-export type ButtonOptions = BaseButtonOptions & {
-  style: Exclude<
-    MessageButtonStyleResolvable,
-    'LINK' | MessageButtonStyles.LINK
-  >;
+export type ButtonOptions = Omit<MessageButtonOptions, 'customId'> & {
+  style: Exclude<MessageButtonStyle, 'LINK'>;
   onClick: ButtonHandler;
 };
 
-export type LinkButtonOptions = BaseButtonOptions & {
-  style: 'LINK' | MessageButtonStyles.LINK;
-  url: string;
+export type LinkButtonOptions = MessageButtonOptions & {
+  style: 'LINK';
 };
 
 function isLinkButtonOptions(
