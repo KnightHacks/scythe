@@ -14,11 +14,15 @@ export function isMessageFilter(maybeFilter: unknown): maybeFilter is MessageFil
 
 export async function runMessageFilters(message: Message, messageFilters: MessageFilter[]): Promise<void> {
   for (const filter of messageFilters) {
-    if (!filter(message)) {
-      if (message.deletable) {
-        await message.delete();
-        return;
+    try {
+      if (!filter(message)) {
+        if (message.deletable) {
+          await message.delete();
+          return;
+        }
       }
+    } catch (error) {
+      console.error(error);
     }
   }
 }
