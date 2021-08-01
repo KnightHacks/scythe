@@ -141,7 +141,6 @@ export function allRoleNames(...roles: string[]): PermissionHandler {
  */
 export function inRoleNames(...roles: string[]): PermissionHandler {
   return (interaction) => {
-    // FIXME is this cast safe?
     const member = interaction.member;
     if (!member || !(member instanceof GuildMember)) {
       console.log(`Member invalid! Was ${member}`);
