@@ -40,27 +40,23 @@ export function registerInteractionListener(
     interaction = bindAllMethods(interaction);
     if (interaction instanceof CommandInteraction) {
       dispatch(interaction, commands, registerUI);
-    }
-
-    if (interaction instanceof ButtonInteraction) {
+    } else if (interaction instanceof ButtonInteraction) {
       const handler = buttonListeners.get(interaction.customId);
-
       if (!handler) {
+        console.log(`Unregistered customId "${interaction.customId}"`);
         return;
       }
-
-      // Run handler.
       handler(interaction);
-    }
-
-    if (interaction instanceof SelectMenuInteraction) {
+    } else if (interaction instanceof SelectMenuInteraction) {
       const handler = selectMenuListeners.get(interaction.customId);
-
       if (!handler) {
+        console.log(`Unregistered customId "${interaction.customId}"`);
         return;
       }
-
       handler(interaction);
+    } else {
+      console.log('Unexpected interaction:');
+      console.log(interaction);
     }
   });
 }
