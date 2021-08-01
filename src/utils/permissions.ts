@@ -72,8 +72,11 @@ export function hasClientFlags(...flags: PermissionResolvable[]): PermissionHand
  */
 export function hasUserFlags(...flags: PermissionResolvable[]): PermissionHandler {
   return (interaction) => {
-    
-    const permissions = interaction.member?.permissions;
+    if (!interaction.member || !(interaction.member instanceof GuildMember)) {
+      console.log(`Member invalid! Was ${interaction.member}`);
+      return false;
+    }
+    const permissions = interaction.member.permissions;
 
     if (!permissions) {
       console.log('Could not lookup permissions');
@@ -102,9 +105,10 @@ const hasID = (member: GuildMember, id: Snowflake) => member.roles.cache.has(id)
 export function allRoleNames(...roles: string[]): PermissionHandler {
   return (interaction) => {
     let allowed = true;
-    // FIXME is this cast safe?
-    const member = interaction.member as GuildMember;
-    if (!member) {
+
+    const member = interaction.member;
+    if (!member || !(member instanceof GuildMember)) {
+      console.log(`Member invalid! Was ${member}`);
       return false;
     }
 
@@ -138,7 +142,12 @@ export function allRoleNames(...roles: string[]): PermissionHandler {
 export function inRoleNames(...roles: string[]): PermissionHandler {
   return (interaction) => {
     // FIXME is this cast safe?
-    const member = interaction.member as GuildMember;
+    const member = interaction.member;
+    if (!member || !(member instanceof GuildMember)) {
+      console.log(`Member invalid! Was ${member}`);
+      return false;
+    }
+
     const allowed = roles.some((roleName) =>
       member.roles.cache.find((role) => role.name === roleName)
     );
@@ -166,7 +175,12 @@ export function inRoleNames(...roles: string[]): PermissionHandler {
  */
 export function allRoles(...roleIDs: Snowflake[]): PermissionHandler {
   return (interaction) => {
-    const member = interaction.member as GuildMember;
+    const member = interaction.member;
+    if (!member || !(member instanceof GuildMember)) {
+      console.log(`Member invalid! Was ${member}`);
+      return false;
+    }
+
     let allowed = true;
     if (!member) {
       return false;
@@ -191,8 +205,9 @@ export function allRoles(...roleIDs: Snowflake[]): PermissionHandler {
  */
 export function inRoles(...roleIDs: Snowflake[]): PermissionHandler {
   return (interaction) => {
-    const member = interaction.member as GuildMember;
-    if (!member) {
+    const member = interaction.member;
+    if (!member || !(member instanceof GuildMember)) {
+      console.log(`Member invalid! Was ${member}`);
       return false;
     }
 
