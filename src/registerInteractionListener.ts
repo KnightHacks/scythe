@@ -15,6 +15,12 @@ import {
   UIComponent,
 } from './UI';
 
+/**
+ * This module sets up event handling for button and select menu listeners and
+ * manages incoming interactions, logging any potential problems.
+ * @param client `Client` object used to register main interaction handler
+ * @param commands `Command`[] to register to listen for `CommandInteraction`s
+ */
 export function registerInteractionListener(
   client: Client,
   commands: Command[]
