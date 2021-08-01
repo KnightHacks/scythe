@@ -17,7 +17,7 @@ import { loadCommands } from './loadCommands';
 import { Command } from './Command';
 import { ButtonHandler, SelectMenuHandler, toDiscordUI, UIComponent } from './UI';
 import { toData } from './utils/command';
-import { isEqual } from 'lodash';
+import { bindAll, isEqual } from 'lodash';
 
 export default class Client extends discord.Client {
 
@@ -169,6 +169,7 @@ export default class Client extends discord.Client {
 
     // Enable dispatcher.
     this.on('interactionCreate', (interaction) => {
+      interaction = bindAll(interaction);
       if (interaction instanceof CommandInteraction) {
         dispatch(interaction, commands, this);
       }
