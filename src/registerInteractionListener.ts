@@ -37,7 +37,7 @@ export function registerInteractionListener(
   };
 
   client.on('interactionCreate', (interaction) => {
-    interaction = bindAll(interaction);
+    interaction = bindAllMethods(interaction);
     if (interaction instanceof CommandInteraction) {
       dispatch(interaction, commands, registerUI);
     }
@@ -63,4 +63,25 @@ export function registerInteractionListener(
       handler(interaction);
     }
   });
+}
+
+export function bindAllMethods<T>(object: T): T {
+  return bindAll(object, getAllMethods(object));
+}
+
+// don't look below here, evil awaits you
+function getAllMethods(object: unknown): string[] {
+  return getAllMethodsHelper(object).filter(
+    (prop) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      prop !== 'constructor' && typeof (object as any)[prop] === 'function'
+  );
+}
+
+function getAllMethodsHelper(object: unknown): string[] {
+  const props = Object.getOwnPropertyNames(object);
+  if (Object.getPrototypeOf(object) !== null) {
+    props.push(...getAllMethodsHelper(Object.getPrototypeOf(object)));
+  }
+  return props;
 }
