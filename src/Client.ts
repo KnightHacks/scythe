@@ -2,47 +2,29 @@ import discord, {
   ApplicationCommand,
   ApplicationCommandData,
   ApplicationCommandPermissionData,
-  ButtonInteraction,
   ClientOptions,
   Collection,
-  CommandInteraction,
   Guild,
   GuildApplicationCommandPermissionData,
-  MessageActionRow,
-  SelectMenuInteraction,
   Snowflake,
 } from 'discord.js';
-import { dispatch } from './dispatch';
-import { loadCommands } from './loadCommands';
+import { isEqual } from 'lodash';
 import { Command } from './Command';
-import { ButtonHandler, SelectMenuHandler, toDiscordUI, UIComponent } from './UI';
+import { loadCommands } from './loadCommands';
+import { registerInteractionListener } from './registerInteractionListener';
 import { toData } from './utils/command';
-import { bindAll, isEqual } from 'lodash';
 
 export default class Client extends discord.Client {
-
   private commands = new Collection<string, Command>();
-
-  /**
-   * A map from button IDs to handler functions. This is used to implement
-   * button click handlers.
-   */
-  buttonListeners: Map<string, ButtonHandler> = new Map();
-  /**
-   * A map from select menu IDs to handler functions. This is used to implement
-   * select click handlers.
-   */
-  selectMenuListeners: Map<string, SelectMenuHandler> = new Map();
 
   /**
    * Handles commands for the bot.
    */
   constructor(options: ClientOptions) {
     super(options);
-  }  
+  }
 
   async syncCommands(commands: Command[]): Promise<void> {
-
     if (!this.isReady()) {
       throw new Error('This must be used after the client is ready.');
     }
@@ -52,9 +34,10 @@ export default class Client extends discord.Client {
     }
 
     // Fetch the commands from the server.
-    const rawCommands = process.env.NODE_ENV === 'development' ?  
-      await this.guilds.cache.get(process.env.GUILD_ID)?.commands.fetch() : 
-      await this.application.commands.fetch();
+    const rawCommands =
+      process.env.NODE_ENV === 'development'
+        ? await this.guilds.cache.get(process.env.GUILD_ID)?.commands.fetch()
+        : await this.application.commands.fetch();
 
     if (!rawCommands) {
       throw new Error('Could not fetch remote commands!');
@@ -63,10 +46,10 @@ export default class Client extends discord.Client {
     // Normalize all of the commands.
 
     const appCommands = new Collection<string, ApplicationCommandData>();
-    rawCommands.map(toData).forEach(data => appCommands.set(data.name, data));
+    rawCommands.map(toData).forEach((data) => appCommands.set(data.name, data));
 
     const clientCommands = new Collection<string, ApplicationCommandData>();
-    commands.map(toData).forEach(data => clientCommands.set(data.name, data));
+    commands.map(toData).forEach((data) => clientCommands.set(data.name, data));
 
     // Helper for whenever there's a diff.
     const push = async () => {
@@ -77,17 +60,19 @@ export default class Client extends discord.Client {
 
     // If the length is not the same it's obvious that the commands aren't the same.
     if (appCommands.size !== clientCommands.size) {
-      console.log({ appCommands: appCommands.size, commands: clientCommands.size });
+      console.log({
+        appCommands: appCommands.size,
+        commands: clientCommands.size,
+      });
       await push();
       return;
     }
 
-
     // Calculate if theres a diff between the local and remote commands.
-    const diff = !appCommands.every(appCommand => {
+    const diff = !appCommands.every((appCommand) => {
       // Get the name, and get the corresponding command with the same name.
       const clientCommand = clientCommands.get(appCommand.name);
-      
+
       // Check if the commands are equal.
       return isEqual(clientCommand, appCommand);
     });
@@ -101,9 +86,7 @@ export default class Client extends discord.Client {
     await push();
   }
 
-  async pushCommands(
-    appCommands: ApplicationCommandData[],
-  ): Promise<void> {
+  async pushCommands(appCommands: ApplicationCommandData[]): Promise<void> {
     let guild: Guild | undefined = undefined;
     if (process.env.GUILD_ID) {
       guild = this.guilds.cache.get(process.env.GUILD_ID);
@@ -153,7 +136,7 @@ export default class Client extends discord.Client {
     // Load all of the commands in.
     const commands = await loadCommands(dir, recursive);
 
-    commands.forEach(command => {
+    commands.forEach((command) => {
       this.commands.set(command.name, command);
     });
 
@@ -166,50 +149,8 @@ export default class Client extends discord.Client {
       // If we get here the client is already ready, so we'll register immediately.
       await this.syncCommands(commands);
     }
-
-    // Enable dispatcher.
-    this.on('interactionCreate', (interaction) => {
-      interaction = bindAll(interaction);
-      if (interaction instanceof CommandInteraction) {
-        dispatch(interaction, commands, this);
-      }
-
-      if (interaction instanceof ButtonInteraction) {
-        const handler = this.buttonListeners.get(interaction.customId);
-
-        if (!handler) {
-          return;
-        }
-
-        // Run handler.
-        handler(interaction);
-      }
-
-      if (interaction instanceof SelectMenuInteraction) {
-        const handler = this.selectMenuListeners.get(interaction.customId);
-
-        if (!handler) {
-          return;
-        }
-
-        handler(interaction);
-      }
-    });
+    registerInteractionListener(this, commands);
   }
-
-  /**
-   * Generates a discord.js `MessageActionRow[]` that can be used in a
-   * message reply as the `components` argument. Allows use of `onClick` and
-   * `onSelect` by autogenerating and registering IDs.
-   *
-   * @param ui Either a single `UIComponent` or a 1D or 2D array of `UIComponent`s
-   * @returns a generated `MessageActionRow[]`
-   */
-  registerUI = (
-    ui: UIComponent | UIComponent[] | UIComponent[][]
-  ): MessageActionRow[] => {
-    return toDiscordUI(ui, this.buttonListeners, this.selectMenuListeners);
-  };
 }
 
 function generatePermissionData(
