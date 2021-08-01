@@ -83,9 +83,6 @@ export function hasUserFlags(...flags: PermissionResolvable[]): PermissionHandle
     let allowed = true;
     if (permissions instanceof Permissions) {
       allowed &&= permissions.has(flags);
-    } else {
-      const perms = new Permissions(permissions);
-      allowed &&= perms.has(flags);
     }
 
     return allowed;
