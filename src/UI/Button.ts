@@ -1,9 +1,9 @@
 import {
   ButtonInteraction,
   MessageButtonOptions,
-  MessageButtonStyle
+  MessageButtonStyle,
 } from 'discord.js';
-import {UIComponent} from './UI';
+import { UIComponent } from './UI';
 
 export type ButtonHandler = (
   interaction: ButtonInteraction
@@ -18,14 +18,10 @@ export type LinkButton = MessageButtonOptions & {
   style: 'LINK';
 };
 
-export function isLinkButton(
-  options: UIComponent
-): options is LinkButton {
+export function isLinkButton(options: UIComponent): options is LinkButton {
   return 'url' in options && 'style' in options && options.style === 'LINK';
 }
 
-export function isRegularButton(
-  options: UIComponent
-): options is Button {
+export function isRegularButton(options: UIComponent): options is Button {
   return 'onClick' in options && 'style' in options;
 }

@@ -6,13 +6,13 @@ import {
 } from 'discord.js';
 import { v4 as uuidv4 } from 'uuid';
 import {
-  ButtonHandler,
   Button,
+  ButtonHandler,
   isLinkButton,
   isRegularButton,
   LinkButton,
 } from './Button';
-import { SelectMenuHandler, SelectMenu, SelectOption } from './SelectMenu';
+import { SelectMenu, SelectMenuHandler, SelectOption } from './SelectMenu';
 
 export type UIComponent = Button | LinkButton | SelectMenu;
 
@@ -56,7 +56,9 @@ function toDiscordComponent(
     return { ...buttonOptions, type: 'BUTTON', customId: id };
   } else {
     const { onSelect, options: optionOptions, ...selectOptions } = options;
-    const discordOptionOptions: MessageSelectOptionData[] = optionOptions.map(toDiscordSelectOptionData);
+    const discordOptionOptions: MessageSelectOptionData[] = optionOptions.map(
+      toDiscordSelectOptionData
+    );
     const id = getID(selectOptions.placeholder ?? '<noplaceholder>', 'select');
     selectMenuListeners.set(id, onSelect);
     return {
@@ -120,16 +122,18 @@ function normalizeUI(
   }
 }
 
-function toDiscordSelectOptionData(option: SelectOption): MessageSelectOptionData {
+function toDiscordSelectOptionData(
+  option: SelectOption
+): MessageSelectOptionData {
   const { value, ...rest } = option;
   if (value === undefined) {
     return {
       ...rest,
-      value: rest.label
+      value: rest.label,
     };
   }
   return {
     ...rest,
-    value
+    value,
   };
 }
