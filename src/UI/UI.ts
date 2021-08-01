@@ -7,14 +7,14 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import {
   ButtonHandler,
-  ButtonOptions,
-  isLinkButtonOptions,
-  isRegularButtonOptions,
-  LinkButtonOptions,
+  Button,
+  isLinkButton,
+  isRegularButton,
+  LinkButton,
 } from './Button';
-import { SelectMenuHandler, SelectMenuOptions, SelectOptionData } from './SelectMenu';
+import { SelectMenuHandler, SelectMenu, SelectOption } from './SelectMenu';
 
-export type UIComponent = ButtonOptions | LinkButtonOptions | SelectMenuOptions;
+export type UIComponent = Button | LinkButton | SelectMenu;
 
 export function toDiscordUI(
   components: UIComponent | UIComponent[] | UIComponent[][],
@@ -43,12 +43,12 @@ function toDiscordComponent(
   buttonListeners: Map<string, ButtonHandler>,
   selectMenuListeners: Map<string, SelectMenuHandler>
 ): MessageButtonOptions | MessageSelectMenuOptions {
-  if (isLinkButtonOptions(options)) {
+  if (isLinkButton(options)) {
     return {
       ...options,
       type: 'BUTTON',
     };
-  } else if (isRegularButtonOptions(options)) {
+  } else if (isRegularButton(options)) {
     // nonlink buttons must have a customId
     const { onClick, ...buttonOptions } = options;
     const id = getID(options.label ?? '<unlabeled>', 'button');
@@ -120,7 +120,7 @@ function normalizeUI(
   }
 }
 
-function toDiscordSelectOptionData(option: SelectOptionData): MessageSelectOptionData {
+function toDiscordSelectOptionData(option: SelectOption): MessageSelectOptionData {
   const { value, ...rest } = option;
   if (value === undefined) {
     return {
