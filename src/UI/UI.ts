@@ -2,6 +2,7 @@ import {
   MessageActionRow,
   MessageButtonOptions,
   MessageSelectMenuOptions,
+  MessageSelectOptionData,
 } from 'discord.js';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -11,7 +12,7 @@ import {
   isRegularButtonOptions,
   LinkButtonOptions,
 } from './Button';
-import { SelectMenuHandler, SelectMenuOptions } from './SelectMenu';
+import { SelectMenuHandler, SelectMenuOptions, SelectOptionData } from './SelectMenu';
 
 export type UIComponent = ButtonOptions | LinkButtonOptions | SelectMenuOptions;
 
@@ -54,11 +55,13 @@ function toDiscordComponent(
     buttonListeners.set(id, onClick);
     return { ...buttonOptions, type: 'BUTTON', customId: id };
   } else {
-    const { onSelect, ...selectOptions } = options;
+    const { onSelect, options: optionOptions, ...selectOptions } = options;
+    const discordOptionOptions: MessageSelectOptionData[] = optionOptions.map(toDiscordSelectOptionData);
     const id = getID(selectOptions.placeholder ?? '<noplaceholder>', 'select');
     selectMenuListeners.set(id, onSelect);
     return {
       ...selectOptions,
+      options: discordOptionOptions,
       type: 'SELECT_MENU',
       customId: id,
     };
@@ -115,4 +118,18 @@ function normalizeUI(
       return [ui as UIComponent[]];
     }
   }
+}
+
+function toDiscordSelectOptionData(option: SelectOptionData): MessageSelectOptionData {
+  const { value, ...rest } = option;
+  if (value === undefined) {
+    return {
+      ...rest,
+      value: rest.label
+    };
+  }
+  return {
+    ...rest,
+    value
+  };
 }
