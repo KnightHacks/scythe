@@ -42,19 +42,10 @@ export async function dispatch(
     }
   }
 
-  if (interaction.guild === null) {
-    await interaction.reply({
-      content: 'Unexpected null guild property!',
-      ephemeral: true,
-    });
-    return;
-  }
-
   try {
     await command.run({
       interaction,
       registerUI,
-      guild: interaction.guild,
     });
   } catch (error) {
     console.error(error);
