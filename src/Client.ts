@@ -149,7 +149,7 @@ export default class Client extends discord.Client {
       // If we get here the client is already ready, so we'll register immediately.
       await this.syncCommands(commands);
     }
-    registerInteractionListener(this, commands);
+    registerInteractionListener(this, commands, new Map(), new Map());
   }
 }
 

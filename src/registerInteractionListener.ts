@@ -20,14 +20,17 @@ import {
  * manages incoming interactions, logging any potential problems.
  * @param client `Client` object used to register main interaction handler
  * @param commands `Command`[] to register to listen for `CommandInteraction`s
+ * @param buttonListeners map from `customId`s to `ButtonHandler`s used to
+ * dispatch listeners
+ * @param selectMenuListeners map from `customId`s to `SelectMenuHandler`s used to
+ * dispatch listeners
  */
 export function registerInteractionListener(
   client: Client,
-  commands: Command[]
+  commands: Command[],
+  buttonListeners: Map<string, ButtonHandler>,
+  selectMenuListeners: Map<string, SelectMenuHandler>
 ): void {
-  const buttonListeners: Map<string, ButtonHandler> = new Map();
-  const selectMenuListeners: Map<string, SelectMenuHandler> = new Map();
-
   /**
    * Generates a discord.js `MessageActionRow[]` that can be used in a
    * message reply as the `components` argument. Allows use of `onClick` and
