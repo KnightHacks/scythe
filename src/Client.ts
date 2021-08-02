@@ -9,13 +9,15 @@ import discord, {
   Snowflake,
 } from 'discord.js';
 import { isEqual } from 'lodash';
-import { Command } from './Command';
-import { loadCommands } from './loadCommands';
+import { Command, isCommand } from './Command';
+import { loadStructures } from './loaders';
+import { MessageFilter, runMessageFilters } from './messageFilters';
 import { registerInteractionListener } from './registerInteractionListener';
 import { toData } from './utils/command';
 
 export default class Client extends discord.Client {
   private commands = new Collection<string, Command>();
+  private messageFilters: MessageFilter[] = [];
 
   /**
    * Handles commands for the bot.
@@ -127,6 +129,14 @@ export default class Client extends discord.Client {
     await guild.commands.permissions.set({ fullPermissions });
   }
 
+  registerMessageFilters(filters: MessageFilter[]): void {
+    this.messageFilters.push(...filters);
+    this.on(
+      'messageCreate',
+      async (message) => await runMessageFilters(message, this.messageFilters)
+    );
+  }
+
   /**
    * Registers the commands to be used by this client.
    * @param dir The directory to load commands from.
@@ -134,7 +144,7 @@ export default class Client extends discord.Client {
    */
   async registerCommands(dir: string, recursive = true): Promise<void> {
     // Load all of the commands in.
-    const commands = await loadCommands(dir, recursive);
+    const commands = await loadStructures(dir, isCommand, recursive);
 
     commands.forEach((command) => {
       this.commands.set(command.name, command);
