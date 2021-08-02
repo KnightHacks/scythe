@@ -1,11 +1,13 @@
 import { CommandInteraction, MessageActionRow } from 'discord.js';
 import { Command } from './Command';
+import { MessageFilter } from './messageFilters';
 import { UI } from './UI';
 
 export async function dispatch(
   interaction: CommandInteraction,
   commands: Command[],
-  registerUI: (ui: UI) => MessageActionRow[]
+  registerUI: (ui: UI) => MessageActionRow[],
+  registerMessageFilters: (filters: MessageFilter[]) => void
 ): Promise<void> {
   // FIXME O(n) performance
   const command = commands.find((c) => c.name === interaction.commandName);
@@ -44,6 +46,7 @@ export async function dispatch(
     await command.run({
       interaction,
       registerUI,
+      registerMessageFilters,
     });
   } catch (error) {
     console.error(error);

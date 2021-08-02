@@ -4,6 +4,7 @@ import {
   MessageActionRow,
   Snowflake,
 } from 'discord.js';
+import { MessageFilter } from './messageFilters';
 import { UI } from './UI';
 
 export type PermissionHandler = (
@@ -35,6 +36,8 @@ export interface Command {
    * @param args.interaction Interaction object from discord.js
    * @param args.registerUI **Must be called at most once per message!**
    * Generates a discord.js compatible UI from Dispatch components.
+   * @param args.registerMessageFilters Registers a callback that receives all
+   * messages and deletes a message if the callback returns false
    */
   run({
     interaction,
@@ -42,6 +45,7 @@ export interface Command {
   }: {
     interaction: CommandInteraction;
     registerUI: (ui: UI) => MessageActionRow[];
+    registerMessageFilters: (filters: MessageFilter[]) => void;
   }): Promise<void> | void;
 
   /**

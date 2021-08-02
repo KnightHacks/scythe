@@ -11,13 +11,11 @@ import discord, {
 import { isEqual } from 'lodash';
 import { Command, isCommand } from './Command';
 import { loadStructures } from './loaders';
-import { MessageFilter, runMessageFilters } from './messageFilters';
 import { registerInteractionListener } from './registerInteractionListener';
 import { toData } from './utils/command';
 
 export default class Client extends discord.Client {
   private commands = new Collection<string, Command>();
-  private messageFilters: MessageFilter[] = [];
 
   /**
    * Handles commands for the bot.
@@ -129,14 +127,6 @@ export default class Client extends discord.Client {
     await guild.commands.permissions.set({ fullPermissions });
   }
 
-  registerMessageFilters(filters: MessageFilter[]): void {
-    this.messageFilters.push(...filters);
-    this.on(
-      'messageCreate',
-      async (message) => await runMessageFilters(message, this.messageFilters)
-    );
-  }
-
   /**
    * Registers the commands to be used by this client.
    * @param dir The directory to load commands from.
@@ -159,7 +149,7 @@ export default class Client extends discord.Client {
       // If we get here the client is already ready, so we'll register immediately.
       await this.syncCommands(commands);
     }
-    registerInteractionListener(this, commands, new Map(), new Map());
+    registerInteractionListener(this, commands, new Map(), new Map(), []);
   }
 }
 

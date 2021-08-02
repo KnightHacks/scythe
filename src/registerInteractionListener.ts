@@ -8,12 +8,8 @@ import {
 import { bindAll } from 'lodash';
 import { Command } from './Command';
 import { dispatch } from './dispatch';
-import {
-  ButtonHandler,
-  SelectMenuHandler,
-  toDiscordUI,
-  UI,
-} from './UI';
+import { MessageFilter, runMessageFilters } from './messageFilters';
+import { ButtonHandler, SelectMenuHandler, toDiscordUI, UI } from './UI';
 
 /**
  * This module sets up event handling for button and select menu listeners and
@@ -24,12 +20,15 @@ import {
  * dispatch listeners
  * @param selectMenuListeners map from `customId`s to `SelectMenuHandler`s used to
  * dispatch listeners
+ * @param messageFilters callbacks that are invoked on every message to
+ * decide if the message should be deleted
  */
 export function registerInteractionListener(
   client: Client,
   commands: Command[],
   buttonListeners: Map<string, ButtonHandler>,
-  selectMenuListeners: Map<string, SelectMenuHandler>
+  selectMenuListeners: Map<string, SelectMenuHandler>,
+  messageFilters: MessageFilter[]
 ): void {
   /**
    * Generates a discord.js `MessageActionRow[]` that can be used in a
@@ -39,16 +38,25 @@ export function registerInteractionListener(
    * @param ui Either a single `UIComponent` or a 1D or 2D array of `UIComponent`s
    * @returns a generated `MessageActionRow[]`
    */
-  const registerUI = (
-    ui: UI
-  ): MessageActionRow[] => {
+  const registerUI = (ui: UI): MessageActionRow[] => {
     return toDiscordUI(ui, buttonListeners, selectMenuListeners);
   };
 
+  const registerMessageFilters = (filters: MessageFilter[]): void => {
+    messageFilters.push(...filters);
+  };
+
+  // set up message filters
+  client.on(
+    'messageCreate',
+    async (message) => await runMessageFilters(message, messageFilters)
+  );
+
+  // handle incoming interactions
   client.on('interactionCreate', (interaction) => {
     interaction = bindAllMethods(interaction);
     if (interaction instanceof CommandInteraction) {
-      dispatch(interaction, commands, registerUI);
+      dispatch(interaction, commands, registerUI, registerMessageFilters);
     } else if (interaction instanceof ButtonInteraction) {
       const handler = buttonListeners.get(interaction.customId);
       if (!handler) {
