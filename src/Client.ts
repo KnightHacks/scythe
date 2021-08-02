@@ -10,14 +10,16 @@ import discord, {
   Snowflake,
 } from 'discord.js';
 import { dispatch } from './dispatch';
-import { loadCommands } from './loadCommands';
-import { Command } from './Command';
+import { loadStructures } from './loaders';
+import { Command, isCommand } from './Command';
 import { toData } from './utils/command';
 import { isEqual } from 'lodash';
+import { MessageFilter, runMessageFilters } from './messageFilters';
 
 export default class Client extends discord.Client {
 
   private commands = new Collection<string, Command>();
+  private messageFilters: MessageFilter[] = [];
 
   /**
    * Handles commands for the bot.
@@ -125,10 +127,15 @@ export default class Client extends discord.Client {
     }
 
     const fullPermissions: GuildApplicationCommandPermissionData[] =
-      generatePermissionData(pushedCommands, this.commands.array());
+      generatePermissionData(pushedCommands, [...this.commands.values()]);
 
     // Apply Permissions (per-guild-only)
     await guild.commands.permissions.set({ fullPermissions });
+  }
+
+  registerMessageFilters(filters: MessageFilter[]): void {
+    this.messageFilters.push(...filters);
+    this.on('messageCreate', async (message) => await runMessageFilters(message, this.messageFilters));
   }
 
   /**
@@ -138,7 +145,7 @@ export default class Client extends discord.Client {
    */
   async registerCommands(dir: string, recursive = true): Promise<void> {
     // Load all of the commands in.
-    const commands = await loadCommands(dir, recursive);
+    const commands = await loadStructures(dir, isCommand, recursive);
 
     commands.forEach(command => {
       this.commands.set(command.name, command);
