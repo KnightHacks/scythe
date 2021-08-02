@@ -9,7 +9,7 @@ export type ButtonHandler = (
   interaction: ButtonInteraction
 ) => void | Promise<void>;
 
-export type Button = Omit<MessageButtonOptions, 'customId'> & {
+export type RegularButton = Omit<MessageButtonOptions, 'customId'> & {
   style: Exclude<MessageButtonStyle, 'LINK'>;
   onClick: ButtonHandler;
 };
@@ -18,10 +18,12 @@ export type LinkButton = MessageButtonOptions & {
   style: 'LINK';
 };
 
+export type Button = RegularButton | LinkButton;
+
 export function isLinkButton(options: UIComponent): options is LinkButton {
   return 'url' in options && 'style' in options && options.style === 'LINK';
 }
 
-export function isRegularButton(options: UIComponent): options is Button {
+export function isRegularButton(options: UIComponent): options is RegularButton {
   return 'onClick' in options && 'style' in options;
 }

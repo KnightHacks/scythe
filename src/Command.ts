@@ -4,7 +4,7 @@ import {
   MessageActionRow,
   Snowflake,
 } from 'discord.js';
-import { UIComponent } from './UI';
+import { UI } from './UI';
 
 export type PermissionHandler = (
   interaction: CommandInteraction
@@ -41,9 +41,7 @@ export interface Command {
     registerUI,
   }: {
     interaction: CommandInteraction;
-    registerUI: (
-      ui: UIComponent | UIComponent[] | UIComponent[][]
-    ) => MessageActionRow[];
+    registerUI: (ui: UI) => MessageActionRow[];
   }): Promise<void> | void;
 
   /**

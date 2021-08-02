@@ -12,7 +12,7 @@ import {
   ButtonHandler,
   SelectMenuHandler,
   toDiscordUI,
-  UIComponent,
+  UI,
 } from './UI';
 
 /**
@@ -40,7 +40,7 @@ export function registerInteractionListener(
    * @returns a generated `MessageActionRow[]`
    */
   const registerUI = (
-    ui: UIComponent | UIComponent[] | UIComponent[][]
+    ui: UI
   ): MessageActionRow[] => {
     return toDiscordUI(ui, buttonListeners, selectMenuListeners);
   };

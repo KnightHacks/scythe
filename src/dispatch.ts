@@ -1,13 +1,11 @@
 import { CommandInteraction, MessageActionRow } from 'discord.js';
 import { Command } from './Command';
-import { UIComponent } from './UI';
+import { UI } from './UI';
 
 export async function dispatch(
   interaction: CommandInteraction,
   commands: Command[],
-  registerUI: (
-    ui: UIComponent | UIComponent[] | UIComponent[][]
-  ) => MessageActionRow[]
+  registerUI: (ui: UI) => MessageActionRow[]
 ): Promise<void> {
   // FIXME O(n) performance
   const command = commands.find((c) => c.name === interaction.commandName);

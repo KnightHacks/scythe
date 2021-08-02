@@ -5,19 +5,17 @@ import {
   MessageSelectOptionData,
 } from 'discord.js';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  Button,
-  ButtonHandler,
-  isLinkButton,
-  isRegularButton,
-  LinkButton,
-} from './Button';
+import { Button, ButtonHandler, isLinkButton, isRegularButton } from './Button';
 import { SelectMenu, SelectMenuHandler, SelectOption } from './SelectMenu';
 
-export type UIComponent = Button | LinkButton | SelectMenu;
+export type UI = UIComponent | Row | [Row, Row?, Row?, Row?, Row?];
+
+export type Row = [Button, Button?, Button?, Button?, Button?] | [SelectMenu];
+
+export type UIComponent = Button | SelectMenu;
 
 export function toDiscordUI(
-  components: UIComponent | UIComponent[] | UIComponent[][],
+  components: UI,
   buttonListeners: Map<string, ButtonHandler>,
   selectMenuListeners: Map<string, SelectMenuHandler>
 ): MessageActionRow[] {
@@ -97,9 +95,7 @@ function getID(label: string, componentType: string): string {
   return `${label}$${componentType}$${uuid}`;
 }
 
-function normalizeUI(
-  ui: UIComponent | UIComponent[] | UIComponent[][]
-): UIComponent[][] {
+function normalizeUI(ui: UI): UIComponent[][] {
   /*
    * We allow the user to pass in a single UI element, a row of elements, or
    * multiple rows of elements.
@@ -108,11 +104,8 @@ function normalizeUI(
     // single item, so we need to wrap in [][] because toComponents expects a UIComponent[][]
     return [[ui]];
   } else {
-    const maybeArray: UIComponent | UIComponent[] | undefined = ui[0];
-    if (maybeArray === undefined) {
-      // we had an empty single array
-      return [[]];
-    } else if (Array.isArray(maybeArray)) {
+    const maybeArray: UIComponent | Row = ui[0];
+    if (Array.isArray(maybeArray)) {
       // we cast because it must be a 2d array
       return ui as UIComponent[][];
     } else {
