@@ -14,7 +14,7 @@ import { loadStructures } from './loaders';
 import { Command, isCommand } from './Command';
 import { toData } from './utils/command';
 import { isEqual } from 'lodash';
-import { MessageFilter, isMessageFilter, runMessageFilters } from './messageFilters';
+import { MessageFilter, runMessageFilters } from './messageFilters';
 
 export default class Client extends discord.Client {
 
@@ -133,9 +133,8 @@ export default class Client extends discord.Client {
     await guild.commands.permissions.set({ fullPermissions });
   }
 
-  async registerMessageFilters(dir: string, recursive = true): Promise<void> {
-    const inhibitors = await loadStructures(dir, isMessageFilter, recursive);
-    this.messageFilters.push(...inhibitors);
+  registerMessageFilters(filters: MessageFilter[]): void {
+    this.messageFilters.push(...filters);
     this.on('messageCreate', async (message) => await runMessageFilters(message, this.messageFilters));
   }
 
