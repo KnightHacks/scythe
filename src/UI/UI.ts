@@ -5,14 +5,28 @@ import {
   MessageSelectOptionData,
 } from 'discord.js';
 import { v4 as uuidv4 } from 'uuid';
-import { Button, ButtonHandler, isLinkButton, isRegularButton } from './Button';
+import {
+  Button,
+  ButtonHandler,
+  isLinkButton,
+  isRegularButton,
+  LinkButton,
+} from './Button';
 import { SelectMenu, SelectMenuHandler, SelectOption } from './SelectMenu';
 
 export type UI = UIComponent | Row | [Row, Row?, Row?, Row?, Row?];
 
-export type Row = [Button, Button?, Button?, Button?, Button?] | [SelectMenu];
+export type Row =
+  | [
+    Button | LinkButton,
+      (Button | LinkButton)?,
+      (Button | LinkButton)?,
+      (Button | LinkButton)?,
+      (Button | LinkButton)?
+  ]
+  | [SelectMenu];
 
-export type UIComponent = Button | SelectMenu;
+export type UIComponent = Button | LinkButton | SelectMenu;
 
 export function toDiscordUI(
   components: UI,
