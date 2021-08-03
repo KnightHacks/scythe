@@ -2,6 +2,7 @@ import {
   ButtonInteraction,
   Client,
   CommandInteraction,
+  Message,
   MessageActionRow,
   SelectMenuInteraction,
 } from 'discord.js';
@@ -50,6 +51,11 @@ export function registerInteractionListener(
   client.on(
     'messageCreate',
     async (message) => await runMessageFilters(message, messageFilters)
+  );
+  client.on(
+    'messageUpdate',
+    async (_, message) =>
+      await runMessageFilters(message as Message, messageFilters)
   );
 
   // handle incoming interactions
