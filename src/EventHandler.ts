@@ -6,11 +6,11 @@ import {
   MessageActionRow,
   SelectMenuInteraction,
 } from 'discord.js';
-import { bindAll } from 'lodash';
 import { Command } from './Command';
 import { dispatch } from './dispatch';
 import { MessageFilter, runMessageFilters } from './messageFilters';
 import { ButtonHandler, SelectMenuHandler, toDiscordUI, UI } from './UI';
+import { bindAllMethods } from './utils/bindAllMethod';
 
 /**
  * This module sets up event handling for button and select menu listeners and
@@ -87,25 +87,4 @@ export class EventHandler {
   registerMessageFilters = (filters: MessageFilter[]): void => {
     this.messageFilters.push(...filters);
   };
-}
-
-export function bindAllMethods<T>(object: T): T {
-  return bindAll(object, getAllMethods(object));
-}
-
-// don't look below here, evil awaits you
-function getAllMethods(object: unknown): string[] {
-  return getAllMethodsHelper(object).filter(
-    (prop) =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      prop !== 'constructor' && typeof (object as any)[prop] === 'function'
-  );
-}
-
-function getAllMethodsHelper(object: unknown): string[] {
-  const props = Object.getOwnPropertyNames(object);
-  if (Object.getPrototypeOf(object) !== null) {
-    props.push(...getAllMethodsHelper(Object.getPrototypeOf(object)));
-  }
-  return props;
 }
