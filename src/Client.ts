@@ -7,6 +7,7 @@ import discord, {
   CommandInteraction,
   Guild,
   GuildApplicationCommandPermissionData,
+  Message,
   Snowflake,
 } from 'discord.js';
 import { dispatch } from './dispatch';
@@ -135,6 +136,7 @@ export default class Client extends discord.Client {
 
   registerMessageFilters(filters: MessageFilter[]): void {
     this.messageFilters.push(...filters);
+    this.on('messageUpdate', async (_, message) => await runMessageFilters(message as Message, this.messageFilters));
     this.on('messageCreate', async (message) => await runMessageFilters(message, this.messageFilters));
   }
 
