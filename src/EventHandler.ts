@@ -2,6 +2,7 @@ import {
   ButtonInteraction,
   Client,
   CommandInteraction,
+  DMChannel,
   Message,
   MessageActionRow,
   SelectMenuInteraction,
@@ -33,12 +34,22 @@ export class EventHandler {
     // set up message filters
     client.on(
       'messageCreate',
-      async (message) => await runMessageFilters(message, this.messageFilters)
+      async (message) => { 
+        if (message.channel instanceof DMChannel) {
+          return;
+        }
+        await runMessageFilters(message, this.messageFilters);
+      } 
     );
     client.on(
       'messageUpdate',
-      async (_, message) =>
-        await runMessageFilters(message as Message, this.messageFilters)
+      async (_, message) => {
+        if (message.channel instanceof DMChannel) {
+          return;
+        }
+        await runMessageFilters(message as Message, this.messageFilters);
+      }
+        
     );
 
     // handle incoming interactions
