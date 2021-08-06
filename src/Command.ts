@@ -1,10 +1,15 @@
 import {
   ApplicationCommandOptionData,
   CommandInteraction,
+  MessageActionRow,
   Snowflake,
 } from 'discord.js';
+import { MessageFilter } from './messageFilters';
+import { UI } from './UI';
 
-export type PermissionHandler = (interaction: CommandInteraction) => boolean | string | Promise<string | boolean>;
+export type PermissionHandler = (
+  interaction: CommandInteraction
+) => boolean | string | Promise<string | boolean>;
 
 /**
  * Represents a the blueprint for a slash commands.
@@ -26,10 +31,22 @@ export interface Command {
   readonly options?: ApplicationCommandOptionData[];
 
   /**
-   * The function that gets executed after the command
-   * is invoked.
+   * The function that gets executed after the command is invoked.
+   * @param args
+   * @param args.interaction Interaction object from discord.js
+   * @param args.registerUI **Must be called at most once per message!**
+   * Generates a discord.js compatible UI from Dispatch components.
+   * @param args.registerMessageFilters Registers a callback that receives all
+   * messages and deletes a message if the callback returns false
    */
-  run(interaction: CommandInteraction): Promise<void> | void;
+  run({
+    interaction,
+    registerUI,
+  }: {
+    interaction: CommandInteraction;
+    registerUI: (ui: UI) => MessageActionRow[];
+    registerMessageFilters: (filters: MessageFilter[]) => void;
+  }): Promise<void> | void;
 
   /**
    * The static role permissions for this command.

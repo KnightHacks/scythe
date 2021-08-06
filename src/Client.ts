@@ -3,16 +3,22 @@ import discord, {
   ApplicationCommandData,
   ApplicationCommandPermissionData,
   ClientOptions,
-  CommandInteraction,
+  Collection,
   Guild,
   GuildApplicationCommandPermissionData,
   Snowflake,
 } from 'discord.js';
-import { dispatch } from './dispatch';
-import { loadCommands } from './loadCommands';
-import { Command } from './Command';
+import { isEqual } from 'lodash';
+import { Command, isCommand } from './Command';
+import { loadStructures } from './loaders';
+import { EventHandler } from './EventHandler';
+import { toData } from './utils/command';
 
 export default class Client extends discord.Client {
+  private commands = new Collection<string, Command>();
+
+  interactionHandler: EventHandler = new EventHandler(this);
+
   /**
    * Handles commands for the bot.
    */
@@ -20,10 +26,69 @@ export default class Client extends discord.Client {
     super(options);
   }
 
-  async pushCommands(
-    commands: Command[],
-    appCommands: ApplicationCommandData[]
-  ): Promise<void> {
+  async syncCommands(commands: Command[]): Promise<void> {
+    if (!this.isReady()) {
+      throw new Error('This must be used after the client is ready.');
+    }
+
+    if (!process.env.GUILD_ID) {
+      throw new Error('Please set the GUILD_ID in your .env file.');
+    }
+
+    // Fetch the commands from the server.
+    const rawCommands =
+      process.env.NODE_ENV === 'development'
+        ? await this.guilds.cache.get(process.env.GUILD_ID)?.commands.fetch()
+        : await this.application.commands.fetch();
+
+    if (!rawCommands) {
+      throw new Error('Could not fetch remote commands!');
+    }
+
+    // Normalize all of the commands.
+
+    const appCommands = new Collection<string, ApplicationCommandData>();
+    rawCommands.map(toData).forEach((data) => appCommands.set(data.name, data));
+
+    const clientCommands = new Collection<string, ApplicationCommandData>();
+    commands.map(toData).forEach((data) => clientCommands.set(data.name, data));
+
+    // Helper for whenever there's a diff.
+    const push = async () => {
+      console.log('Local commands differ from remote commands, syncing now...');
+      await this.pushCommands(commands);
+      console.log('Finished syncing');
+    };
+
+    // If the length is not the same it's obvious that the commands aren't the same.
+    if (appCommands.size !== clientCommands.size) {
+      console.log({
+        appCommands: appCommands.size,
+        commands: clientCommands.size,
+      });
+      await push();
+      return;
+    }
+
+    // Calculate if theres a diff between the local and remote commands.
+    const diff = !appCommands.every((appCommand) => {
+      // Get the name, and get the corresponding command with the same name.
+      const clientCommand = clientCommands.get(appCommand.name);
+
+      // Check if the commands are equal.
+      return isEqual(clientCommand, appCommand);
+    });
+
+    // There's no diff then the commands are in sync.
+    if (!diff) {
+      console.log('Commands are already in sync, nothing to push...');
+      return;
+    }
+
+    await push();
+  }
+
+  async pushCommands(appCommands: ApplicationCommandData[]): Promise<void> {
     let guild: Guild | undefined = undefined;
     if (process.env.GUILD_ID) {
       guild = this.guilds.cache.get(process.env.GUILD_ID);
@@ -32,9 +97,7 @@ export default class Client extends discord.Client {
     }
 
     if (!guild) {
-      throw new Error(
-        'Guild is not initialized, check your GUILD_ID.'
-      );
+      throw new Error('Guild is not initialized, check your GUILD_ID.');
     }
 
     let pushedCommands: ApplicationCommand[] | undefined;
@@ -46,89 +109,52 @@ export default class Client extends discord.Client {
         'Development environment detected..., using guild commands instead of application commands.'
       );
 
-      await this.clearAllCommands(guild);
       pushedCommands = await guild.commands
         .set(appCommands)
         .then((x) => [...x.values()]);
     } else {
-      await this.clearAllCommands(guild);
       pushedCommands = await this.application?.commands
         .set(appCommands)
         .then((x) => [...x.values()]);
     }
 
     if (!pushedCommands) {
-      throw new Error('Could not push commands to server!');
+      return;
     }
 
     const fullPermissions: GuildApplicationCommandPermissionData[] =
-      generatePermissionData(pushedCommands, commands);
+      generatePermissionData(pushedCommands, [...this.commands.values()]);
 
     // Apply Permissions (per-guild-only)
     await guild.commands.permissions.set({ fullPermissions });
   }
 
-  private async clearAllCommands(guild: Guild) {
-    await guild.commands.set([]);
-    await this.application?.commands.set([]);
-  }
-
   /**
    * Registers the commands to be used by this client.
    * @param dir The directory to load commands from.
+   * @param recursive Whether or not to look for commands recursively.
    */
-  async registerCommands(dir: string): Promise<void> {
+  async registerCommands(dir: string, recursive = true): Promise<void> {
     // Load all of the commands in.
-    const commands = await loadCommands(dir);
+    const commands = await loadStructures(dir, isCommand, recursive);
 
-    // Get discord-compatible commands.
-    const appCommands = commands.map(toAppCommand);
+    commands.forEach((command) => {
+      this.commands.set(command.name, command);
+    });
 
-    if (!this.readyAt) {
+    if (!this.isReady()) {
       // Register commands to the discord API, once the client is ready.
-      this.once('ready', () => this.pushCommands(commands, appCommands));
+      this.once('ready', async () => {
+        await this.syncCommands(commands);
+      });
     } else {
       // If we get here the client is already ready, so we'll register immediately.
-      await this.pushCommands(commands, appCommands);
+      await this.syncCommands(commands);
     }
-
-    // Enable dispatcher.
-    this.on('interactionCreate', (interaction) => {
-      if (interaction instanceof CommandInteraction) {
-        dispatch(interaction, commands);
-      }
-
-      // FIXME figure out a button/select menu api that
-      /*
-      if (interaction instanceof ButtonInteraction) {
-        const handler = client.buttonListeners.get(interaction.customId);
-
-        if (!handler) {
-          return;
-        }
-
-        // Run handler.
-        handler(interaction);
-      }
-      */
-    });
+    this.interactionHandler.commands = commands;
   }
-}
 
-/**
- * Converts a {@link Command} to an {@link ApplicationCommandData}.
- * @returns an {@link ApplicationCommandData}.
- */
-export function toAppCommand(command: Command): ApplicationCommandData {
-  const defaultPermission: boolean =
-    (command.allowedRoles ?? command.allowedUsers) === undefined;
-
-  return {
-    name: command.name,
-    options: command.options,
-    description: command.description,
-    defaultPermission,
-  };
+  registerMessageFilters = this.interactionHandler.registerMessageFilters;
 }
 
 function generatePermissionData(
