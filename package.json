@@ -5,6 +5,10 @@
   "description": "A command-driven discord.js addon",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "engines": {
+    "node": ">=16.6.0",
+    "npm": ">=7.0.0"
+  },
   "scripts": {
     "build": "tsc",
     "start": "npm start:dev",
@@ -35,7 +39,7 @@
     "@typescript-eslint/eslint-plugin": "^4.28.2",
     "@typescript-eslint/parser": "^4.28.2",
     "babel-jest": "^27.0.6",
-    "discord.js": "^13.0.0-dev.t1627778678.74fc23b",
+    "discord.js": "^13.0.0",
     "eslint": "^7.30.0",
     "jest": "^27.0.6",
     "lodash": "^4.17.21",
