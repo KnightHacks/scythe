@@ -76,7 +76,7 @@ export function isCommand(maybeCommand: unknown): maybeCommand is Command {
   }
 
   // Iterate through required command properties
-  const requiredProps = ['name', 'run'];
+  const requiredProps = ['name', 'description', 'run'];
 
   let retVal = true;
   requiredProps.forEach((prop) => {
