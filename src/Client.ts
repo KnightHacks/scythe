@@ -17,7 +17,7 @@ import { toData } from './utils/command';
 export default class Client extends discord.Client {
   private commands = new Collection<string, Command>();
 
-  interactionHandler: EventHandler = new EventHandler(this);
+  eventHandler: EventHandler = new EventHandler(this);
 
   /**
    * Handles commands for the bot.
@@ -151,10 +151,10 @@ export default class Client extends discord.Client {
       // If we get here the client is already ready, so we'll register immediately.
       await this.syncCommands(commands);
     }
-    this.interactionHandler.commands = commands;
+    this.eventHandler.commands = commands;
   }
 
-  registerMessageFilters = this.interactionHandler.registerMessageFilters;
+  registerMessageFilters = this.eventHandler.registerMessageFilters;
 }
 
 function generatePermissionData(
