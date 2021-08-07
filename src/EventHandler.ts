@@ -1,12 +1,4 @@
-import {
-  ButtonInteraction,
-  Client,
-  CommandInteraction,
-  DMChannel,
-  Message,
-  MessageActionRow,
-  SelectMenuInteraction,
-} from 'discord.js';
+import { Client, DMChannel, Message, MessageActionRow } from 'discord.js';
 import { Command } from './Command';
 import { dispatch } from './dispatch';
 import { MessageFilter, runMessageFilters } from './messageFilters';
@@ -32,44 +24,37 @@ export class EventHandler {
    */
   constructor(client: Client) {
     // set up message filters
-    client.on(
-      'messageCreate',
-      async (message) => { 
-        if (message.channel instanceof DMChannel) {
-          return;
-        }
-        await runMessageFilters(message, this.messageFilters);
-      } 
-    );
-    client.on(
-      'messageUpdate',
-      async (_, message) => {
-        if (message.channel instanceof DMChannel) {
-          return;
-        }
-        await runMessageFilters(message as Message, this.messageFilters);
+    client.on('messageCreate', async (message) => {
+      if (message.channel instanceof DMChannel) {
+        return;
       }
-        
-    );
+      await runMessageFilters(message, this.messageFilters);
+    });
+    client.on('messageUpdate', async (_, message) => {
+      if (message.channel instanceof DMChannel) {
+        return;
+      }
+      await runMessageFilters(message as Message, this.messageFilters);
+    });
 
     // handle incoming interactions
     client.on('interactionCreate', (interaction) => {
       interaction = bindAllMethods(interaction);
-      if (interaction instanceof CommandInteraction) {
+      if (interaction.isCommand()) {
         dispatch(
           interaction,
           this.commands,
           this.registerUI,
           this.registerMessageFilters
         );
-      } else if (interaction instanceof ButtonInteraction) {
+      } else if (interaction.isButton()) {
         const handler = this.buttonListeners.get(interaction.customId);
         if (!handler) {
           console.log(`Unregistered customId "${interaction.customId}"`);
           return;
         }
         handler(interaction);
-      } else if (interaction instanceof SelectMenuInteraction) {
+      } else if (interaction.isSelectMenu()) {
         const handler = this.selectMenuListeners.get(interaction.customId);
         if (!handler) {
           console.log(`Unregistered customId "${interaction.customId}"`);
