@@ -11,7 +11,7 @@ import { Command } from './Command';
 import { dispatch } from './dispatch';
 import { MessageFilter, runMessageFilters } from './messageFilters';
 import { ButtonHandler, SelectMenuHandler, toDiscordUI, UI } from './UI';
-import { bindAllMethods } from './utils/bindAllMethod';
+import { bindAllMethods } from './utils/bindAllMethods';
 
 /**
  * This module sets up event handling for button and select menu listeners and
