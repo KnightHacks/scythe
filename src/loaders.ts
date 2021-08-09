@@ -35,6 +35,10 @@ export async function loadStructures<T>(dir: string, typeChecker: TypeGuard<T>, 
       throw new Error('Recursive structure loading is disabled, cannot load subdirectories.');
     }
 
+    if (!importPath.endsWith('.ts') && !importPath.endsWith('.js')) {
+      continue;
+    }
+
     // Dynamically import command file.
     const { default: structure }: { default: unknown } = await import(
       importPath
