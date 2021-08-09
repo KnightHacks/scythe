@@ -16,7 +16,7 @@ import { toData } from './utils/command';
 
 export default class Client extends discord.Client {
   private commands = new Collection<string, Command>();
-
+  public onError?: (command: Command, error: Error) => void;
   eventHandler: EventHandler = new EventHandler(this);
 
   /**

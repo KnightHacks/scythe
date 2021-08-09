@@ -1,4 +1,5 @@
-import { Client, DMChannel, Message, MessageActionRow } from 'discord.js';
+import { DMChannel, Message, MessageActionRow } from 'discord.js';
+import { Client } from '.';
 import { Command } from './Command';
 import { dispatch } from './dispatch';
 import { MessageFilter, runMessageFilters } from './messageFilters';
@@ -42,6 +43,7 @@ export class EventHandler {
       interaction = bindAllMethods(interaction);
       if (interaction.isCommand()) {
         dispatch(
+          client,
           interaction,
           this.commands,
           this.registerUI,

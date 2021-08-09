@@ -1,9 +1,11 @@
 import { CommandInteraction, MessageActionRow } from 'discord.js';
+import { Client } from '.';
 import { Command } from './Command';
 import { MessageFilter } from './messageFilters';
 import { UI } from './UI';
 
 export async function dispatch(
+  client: Client,
   interaction: CommandInteraction,
   commands: Command[],
   registerUI: (ui: UI) => MessageActionRow[],
@@ -49,6 +51,8 @@ export async function dispatch(
       registerMessageFilters,
     });
   } catch (error) {
-    console.error(error);
+    if (client.onError) {
+      client.onError(command, error);
+    }
   }
 }
