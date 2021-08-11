@@ -19,7 +19,7 @@ export type PermissionHandler = (
   interaction: CommandInteraction
 ) => boolean | string | Promise<string | boolean>;
 
-export interface CommandBase<T extends Interaction> extends ApplicationCommandData {
+export interface CommandBase<T extends CommandInteraction | ContextMenuInteraction> extends ApplicationCommandData {
   /**
    * The static role permissions for this command.
    */
@@ -58,30 +58,7 @@ export interface SlashCommand extends CommandBase<CommandInteraction> {
 export type Command = ContextMenuCommand | SlashCommand;
 
 // This type is only for type erasure in dispatch.ts
-export type RawCommand = CommandBase<Interaction> & Command;
-
-// /**
-//  * Represents a the blueprint for a slash commands.
-//  */
-// export interface Command extends ApplicationCommandData {
-//   /**
-//    * The function that gets executed after the command is invoked.
-//    * @param args
-//    * @param args.interaction Interaction object from discord.js
-//    * @param args.registerUI **Must be called at most once per message!**
-//    * Generates a discord.js compatible UI from Dispatch components.
-//    * @param args.registerMessageFilters Registers a callback that receives all
-//    * messages and deletes a message if the callback returns false
-//    */
-//   run({
-//     interaction,
-//     registerUI,
-//   }: {
-//     interaction: CommandInteraction | ContextMenuInteraction;
-//     registerUI: (ui: UI) => MessageActionRow[];
-//     registerMessageFilters: (filters: MessageFilter[]) => void;
-//   }): Promise<void> | void;
-// }
+export type RawCommand = CommandBase<ContextMenuInteraction | CommandInteraction> & Command;
 
 /**
  * Returns whether an object of unknown type is a Command.
