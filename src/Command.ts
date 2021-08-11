@@ -73,29 +73,6 @@ export interface SlashCommand extends CommandBase {
 
 export type Command = ContextMenuCommand | SlashCommand;
 
-// /**
-//  * Represents a the blueprint for a slash commands.
-//  */
-// export interface Command extends ApplicationCommandData {
-//   /**
-//    * The function that gets executed after the command is invoked.
-//    * @param args
-//    * @param args.interaction Interaction object from discord.js
-//    * @param args.registerUI **Must be called at most once per message!**
-//    * Generates a discord.js compatible UI from Dispatch components.
-//    * @param args.registerMessageFilters Registers a callback that receives all
-//    * messages and deletes a message if the callback returns false
-//    */
-//   run({
-//     interaction,
-//     registerUI,
-//   }: {
-//     interaction: CommandInteraction | ContextMenuInteraction;
-//     registerUI: (ui: UI) => MessageActionRow[];
-//     registerMessageFilters: (filters: MessageFilter[]) => void;
-//   }): Promise<void> | void;
-// }
-
 /**
  * Returns whether an object of unknown type is a Command.
  * @param maybeCommand The denormalized command type to check.
