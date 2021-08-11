@@ -1,5 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommand, ApplicationCommandData } from 'discord.js';
-import { Command } from '..';
+import { ApplicationCommandOptionData, ApplicationCommandData } from 'discord.js';
 
 function normalizeOption(option: ApplicationCommandOptionData): ApplicationCommandOptionData {
   if (!option.required) {
@@ -22,13 +21,25 @@ function normalizeOption(option: ApplicationCommandOptionData): ApplicationComma
   return option;
 }
   
-export function toData(command: ApplicationCommand | Command): ApplicationCommandData {
+export function toData(command: ApplicationCommandData): ApplicationCommandData {
+
+  const name = command.name;
+
   // Normalize all of the options.
-  const newOptions = command.options?.map(normalizeOption);
-  
-  return {
-    name: command.name,
-    description: command.description,
-    options: newOptions ?? []
-  };
+  if (command.type === 'CHAT_INPUT') {
+    // Normalize all of the options.
+    const newOptions = command.options?.map(normalizeOption);
+
+    return {
+      type: command.type,
+      name,
+      description: command.description,
+      options: newOptions ?? [],
+    };
+  } else {
+    return {
+      type: command.type,
+      name,
+    } as ApplicationCommandData;
+  }
 }
