@@ -1,10 +1,13 @@
 import {
   ApplicationCommandData,
+  ChatInputApplicationCommandData,
   CommandInteraction,
   ContextMenuInteraction,
   Interaction,
   MessageActionRow,
+  MessageApplicationCommandData,
   Snowflake,
+  UserApplicationCommandData,
 } from 'discord.js';
 import { MessageFilter } from './messageFilters';
 import { UI } from './UI';
@@ -19,7 +22,7 @@ export type PermissionHandler = (
   interaction: CommandInteraction
 ) => boolean | string | Promise<string | boolean>;
 
-export interface CommandBase<T extends CommandInteraction | ContextMenuInteraction> extends ApplicationCommandData {
+export type CommandBase<T extends CommandInteraction> = ApplicationCommandData & {
   /**
    * The static role permissions for this command.
    */
@@ -45,15 +48,11 @@ export interface CommandBase<T extends CommandInteraction | ContextMenuInteracti
    * messages and deletes a message if the callback returns false
    */
   run: CommandRunner<T>;
-}
+};
 
-export interface ContextMenuCommand extends CommandBase<ContextMenuInteraction> {
-  type: 'MESSAGE' | 'USER';
-}
+export type ContextMenuCommand = CommandBase<ContextMenuInteraction> & (UserApplicationCommandData | MessageApplicationCommandData);
 
-export interface SlashCommand extends CommandBase<CommandInteraction> {
-  type: 'CHAT_INPUT';
-}
+export type SlashCommand = CommandBase<CommandInteraction> & ChatInputApplicationCommandData;
 
 export type Command = ContextMenuCommand | SlashCommand;
 
