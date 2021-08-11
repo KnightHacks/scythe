@@ -39,7 +39,7 @@
     "@typescript-eslint/eslint-plugin": "^4.29.0",
     "@typescript-eslint/parser": "^4.29.0",
     "babel-jest": "^27.0.6",
-    "discord.js": "^13.0.1",
+    "discord.js": "^13.1.0-dev.1628640678.0266f28",
     "eslint": "^7.32.0",
     "jest": "^27.0.6",
     "lodash": "^4.17.21",

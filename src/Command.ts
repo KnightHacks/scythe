@@ -1,6 +1,7 @@
 import {
-  ApplicationCommandOptionData,
+  ApplicationCommandData,
   CommandInteraction,
+  ContextMenuInteraction,
   MessageActionRow,
   Snowflake,
 } from 'discord.js';
@@ -14,22 +15,7 @@ export type PermissionHandler = (
 /**
  * Represents a the blueprint for a slash commands.
  */
-export interface Command {
-  /**
-   * The name of the command.
-   */
-  get name(): string;
-
-  /**
-   * The description of the command.
-   */
-  get description(): string;
-
-  /**
-   * The options available for this command.
-   */
-  readonly options?: ApplicationCommandOptionData[];
-
+export interface Command extends ApplicationCommandData {
   /**
    * The function that gets executed after the command is invoked.
    * @param args
@@ -43,7 +29,7 @@ export interface Command {
     interaction,
     registerUI,
   }: {
-    interaction: CommandInteraction;
+    interaction: CommandInteraction | ContextMenuInteraction;
     registerUI: (ui: UI) => MessageActionRow[];
     registerMessageFilters: (filters: MessageFilter[]) => void;
   }): Promise<void> | void;
@@ -76,7 +62,7 @@ export function isCommand(maybeCommand: unknown): maybeCommand is Command {
   }
 
   // Iterate through required command properties
-  const requiredProps = ['name', 'description', 'run'];
+  const requiredProps = ['name', 'run'];
 
   let retVal = true;
   requiredProps.forEach((prop) => {
