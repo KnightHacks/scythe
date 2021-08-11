@@ -24,6 +24,7 @@ function normalizeOption(option: ApplicationCommandOptionData): ApplicationComma
 export function toData(command: ApplicationCommandData): ApplicationCommandData {
 
   const name = command.name;
+  const type = command.type;
 
   // Normalize all of the options.
   if (command.type === 'CHAT_INPUT') {
@@ -31,14 +32,14 @@ export function toData(command: ApplicationCommandData): ApplicationCommandData 
     const newOptions = command.options?.map(normalizeOption);
 
     return {
-      type: command.type,
+      type,
       name,
       description: command.description,
       options: newOptions ?? [],
     };
   } else {
     return {
-      type: command.type,
+      type,
       name,
     } as ApplicationCommandData;
   }
