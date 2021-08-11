@@ -1,4 +1,4 @@
-import { CommandInteraction, MessageActionRow } from 'discord.js';
+import { CommandInteraction, ContextMenuInteraction, MessageActionRow } from 'discord.js';
 import { Client } from '.';
 import { Command } from './Command';
 import { MessageFilter } from './messageFilters';
@@ -6,7 +6,7 @@ import { UI } from './UI';
 
 export async function dispatch(
   client: Client,
-  interaction: CommandInteraction,
+  interaction: CommandInteraction | ContextMenuInteraction,
   commands: Command[],
   registerUI: (ui: UI) => MessageActionRow[],
   registerMessageFilters: (filters: MessageFilter[]) => void
@@ -46,7 +46,7 @@ export async function dispatch(
 
   try {
     await command.run({
-      interaction,
+      interaction: interaction as (CommandInteraction & ContextMenuInteraction),
       registerUI,
       registerMessageFilters,
     });

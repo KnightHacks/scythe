@@ -2,20 +2,38 @@ import {
   ApplicationCommandData,
   CommandInteraction,
   ContextMenuInteraction,
+  Interaction,
   MessageActionRow,
   Snowflake,
 } from 'discord.js';
 import { MessageFilter } from './messageFilters';
 import { UI } from './UI';
 
+export interface BaseParameters {
+  registerUI: (ui: UI) => MessageActionRow[];
+  registerMessageFilters: (filters: MessageFilter[]) => void;
+}
+
 export type PermissionHandler = (
   interaction: CommandInteraction
 ) => boolean | string | Promise<string | boolean>;
 
-/**
- * Represents a the blueprint for a slash commands.
- */
-export interface Command extends ApplicationCommandData {
+export interface CommandBase extends ApplicationCommandData {
+  /**
+   * The static role permissions for this command.
+   */
+  allowedRoles?: Snowflake[];
+
+  /**
+     * The static user permissions for this commands
+     */
+  allowedUsers?: Snowflake[];
+  
+  /**
+     * The {@link PermissionHandler} that handles the permissions for this command.
+     */
+  readonly permissionHandler?: PermissionHandler;
+
   /**
    * The function that gets executed after the command is invoked.
    * @param args
@@ -28,27 +46,55 @@ export interface Command extends ApplicationCommandData {
   run({
     interaction,
     registerUI,
-  }: {
-    interaction: CommandInteraction | ContextMenuInteraction;
-    registerUI: (ui: UI) => MessageActionRow[];
-    registerMessageFilters: (filters: MessageFilter[]) => void;
+  }: BaseParameters & {
+    interaction: Interaction;
   }): Promise<void> | void;
-
-  /**
-   * The static role permissions for this command.
-   */
-  allowedRoles?: Snowflake[];
-
-  /**
-   * The static user permissions for this commands
-   */
-  allowedUsers?: Snowflake[];
-
-  /**
-   * The {@link PermissionHandler} that handles the permissions for this command.
-   */
-  readonly permissionHandler?: PermissionHandler;
 }
+
+export interface ContextMenuCommand extends CommandBase {
+  type: 'MESSAGE' | 'USER';
+  run({
+    interaction,
+    registerUI,
+  }: BaseParameters & {
+    interaction: ContextMenuInteraction;
+  }): Promise<void> | void;
+}
+
+export interface SlashCommand extends CommandBase {
+  type: 'CHAT_INPUT';
+  run({
+    interaction,
+    registerUI,
+  }: BaseParameters & {
+    interaction: CommandInteraction;
+  }): Promise<void> | void;
+}
+
+export type Command = ContextMenuCommand | SlashCommand;
+
+// /**
+//  * Represents a the blueprint for a slash commands.
+//  */
+// export interface Command extends ApplicationCommandData {
+//   /**
+//    * The function that gets executed after the command is invoked.
+//    * @param args
+//    * @param args.interaction Interaction object from discord.js
+//    * @param args.registerUI **Must be called at most once per message!**
+//    * Generates a discord.js compatible UI from Dispatch components.
+//    * @param args.registerMessageFilters Registers a callback that receives all
+//    * messages and deletes a message if the callback returns false
+//    */
+//   run({
+//     interaction,
+//     registerUI,
+//   }: {
+//     interaction: CommandInteraction | ContextMenuInteraction;
+//     registerUI: (ui: UI) => MessageActionRow[];
+//     registerMessageFilters: (filters: MessageFilter[]) => void;
+//   }): Promise<void> | void;
+// }
 
 /**
  * Returns whether an object of unknown type is a Command.
