@@ -1,4 +1,5 @@
 import { ApplicationCommandOptionData, ApplicationCommandData } from 'discord.js';
+import { ApplicationCommandTypes } from 'discord.js/typings/enums';
 
 function normalizeOption(option: ApplicationCommandOptionData): ApplicationCommandOptionData {
   if (!option.required) {
@@ -24,23 +25,22 @@ function normalizeOption(option: ApplicationCommandOptionData): ApplicationComma
 export function toData(command: ApplicationCommandData): ApplicationCommandData {
 
   const name = command.name;
-  const type = command.type;
 
   // Normalize all of the options.
-  if (command.type === 'CHAT_INPUT') {
+  if (command.type === 'CHAT_INPUT' || command.type === ApplicationCommandTypes.CHAT_INPUT) {
     // Normalize all of the options.
     const newOptions = command.options?.map(normalizeOption);
 
     return {
-      type,
+      type: command.type,
       name,
       description: command.description,
       options: newOptions ?? [],
     };
   } else {
     return {
-      type,
+      type: command.type,
       name,
-    } as ApplicationCommandData;
+    };
   }
 }
