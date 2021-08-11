@@ -1,6 +1,6 @@
 import { CommandInteraction, ContextMenuInteraction, MessageActionRow } from 'discord.js';
 import { Client } from '.';
-import { Command } from './Command';
+import { Command, RawCommand } from './Command';
 import { MessageFilter } from './messageFilters';
 import { UI } from './UI';
 
@@ -12,7 +12,7 @@ export async function dispatch(
   registerMessageFilters: (filters: MessageFilter[]) => void
 ): Promise<void> {
   // FIXME O(n) performance
-  const command = commands.find((c) => c.name === interaction.commandName);
+  const command = commands.find((c) => c.name === interaction.commandName) as RawCommand;
 
   // This should ideally never happen.
   if (!command) {
@@ -46,7 +46,7 @@ export async function dispatch(
 
   try {
     await command.run({
-      interaction: interaction as (CommandInteraction & ContextMenuInteraction),
+      interaction,
       registerUI,
       registerMessageFilters,
     });

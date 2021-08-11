@@ -1,24 +1,28 @@
 import {
   ApplicationCommandData,
+  ChatInputApplicationCommandData,
   CommandInteraction,
   ContextMenuInteraction,
   Interaction,
   MessageActionRow,
+  MessageApplicationCommandData,
   Snowflake,
+  UserApplicationCommandData,
 } from 'discord.js';
 import { MessageFilter } from './messageFilters';
 import { UI } from './UI';
 
-export interface BaseParameters {
+export type CommandRunner<T extends Interaction> = ({ interaction, registerUI, registerMessageFilters }: {
+  interaction: T;
   registerUI: (ui: UI) => MessageActionRow[];
   registerMessageFilters: (filters: MessageFilter[]) => void;
-}
+}) => Promise<void> | void;
 
 export type PermissionHandler = (
   interaction: CommandInteraction
 ) => boolean | string | Promise<string | boolean>;
 
-export interface CommandBase extends ApplicationCommandData {
+export type CommandBase<T extends CommandInteraction> = ApplicationCommandData & {
   /**
    * The static role permissions for this command.
    */
@@ -43,35 +47,17 @@ export interface CommandBase extends ApplicationCommandData {
    * @param args.registerMessageFilters Registers a callback that receives all
    * messages and deletes a message if the callback returns false
    */
-  run({
-    interaction,
-    registerUI,
-  }: BaseParameters & {
-    interaction: Interaction;
-  }): Promise<void> | void;
-}
+  run: CommandRunner<T>;
+};
 
-export interface ContextMenuCommand extends CommandBase {
-  type: 'MESSAGE' | 'USER';
-  run({
-    interaction,
-    registerUI,
-  }: BaseParameters & {
-    interaction: ContextMenuInteraction;
-  }): Promise<void> | void;
-}
+export type ContextMenuCommand = CommandBase<ContextMenuInteraction> & (UserApplicationCommandData | MessageApplicationCommandData);
 
-export interface SlashCommand extends CommandBase {
-  type: 'CHAT_INPUT';
-  run({
-    interaction,
-    registerUI,
-  }: BaseParameters & {
-    interaction: CommandInteraction;
-  }): Promise<void> | void;
-}
+export type SlashCommand = CommandBase<CommandInteraction> & ChatInputApplicationCommandData;
 
 export type Command = ContextMenuCommand | SlashCommand;
+
+// This type is only for type erasure in dispatch.ts
+export type RawCommand = CommandBase<ContextMenuInteraction | CommandInteraction> & Command;
 
 /**
  * Returns whether an object of unknown type is a Command.
