@@ -9,16 +9,17 @@ import {
 import { MessageFilter } from './messageFilters';
 import { UI } from './UI';
 
-export interface BaseParameters {
+export type CommandRunner<T extends Interaction> = ({ interaction, registerUI, registerMessageFilters }: {
+  interaction: T;
   registerUI: (ui: UI) => MessageActionRow[];
   registerMessageFilters: (filters: MessageFilter[]) => void;
-}
+}) => Promise<void> | void;
 
 export type PermissionHandler = (
   interaction: CommandInteraction
 ) => boolean | string | Promise<string | boolean>;
 
-export interface CommandBase extends ApplicationCommandData {
+export interface CommandBase<T extends Interaction> extends ApplicationCommandData {
   /**
    * The static role permissions for this command.
    */
@@ -43,35 +44,21 @@ export interface CommandBase extends ApplicationCommandData {
    * @param args.registerMessageFilters Registers a callback that receives all
    * messages and deletes a message if the callback returns false
    */
-  run({
-    interaction,
-    registerUI,
-  }: BaseParameters & {
-    interaction: Interaction;
-  }): Promise<void> | void;
+  run: CommandRunner<T>;
 }
 
-export interface ContextMenuCommand extends CommandBase {
+export interface ContextMenuCommand extends CommandBase<ContextMenuInteraction> {
   type: 'MESSAGE' | 'USER';
-  run({
-    interaction,
-    registerUI,
-  }: BaseParameters & {
-    interaction: ContextMenuInteraction;
-  }): Promise<void> | void;
 }
 
-export interface SlashCommand extends CommandBase {
+export interface SlashCommand extends CommandBase<CommandInteraction> {
   type: 'CHAT_INPUT';
-  run({
-    interaction,
-    registerUI,
-  }: BaseParameters & {
-    interaction: CommandInteraction;
-  }): Promise<void> | void;
 }
 
 export type Command = ContextMenuCommand | SlashCommand;
+
+// This type is only for type erasure in dispatch.ts
+export type RawCommand = CommandBase<Interaction> & Command;
 
 // /**
 //  * Represents a the blueprint for a slash commands.
