@@ -56,9 +56,6 @@ export type SlashCommand = CommandBase<CommandInteraction> & ChatInputApplicatio
 
 export type Command = ContextMenuCommand | SlashCommand;
 
-// This type is only for type erasure in dispatch.ts
-export type RawCommand = CommandBase<ContextMenuInteraction | CommandInteraction> & Command;
-
 /**
  * Returns whether an object of unknown type is a Command.
  * @param maybeCommand The denormalized command type to check.

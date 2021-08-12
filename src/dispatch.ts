@@ -1,8 +1,13 @@
-import { CommandInteraction, ContextMenuInteraction, MessageActionRow } from 'discord.js';
-import { Client } from '.';
-import { Command, RawCommand } from './Command';
+import {
+  CommandInteraction,
+  ContextMenuInteraction,
+  MessageActionRow,
+} from 'discord.js';
+import Client from './Client';
+import { Command } from './Command';
 import { MessageFilter } from './messageFilters';
 import { UI } from './UI';
+import { isChatInputCommand, isContextMenuCommand } from './utils/command';
 
 export async function dispatch(
   client: Client,
@@ -12,7 +17,7 @@ export async function dispatch(
   registerMessageFilters: (filters: MessageFilter[]) => void
 ): Promise<void> {
   // FIXME O(n) performance
-  const command = commands.find((c) => c.name === interaction.commandName) as RawCommand;
+  const command = commands.find((c) => c.name === interaction.commandName);
 
   // This should ideally never happen.
   if (!command) {
@@ -45,11 +50,21 @@ export async function dispatch(
   }
 
   try {
-    await command.run({
-      interaction,
-      registerUI,
-      registerMessageFilters,
-    });
+    if (isChatInputCommand(command)) {
+      await command.run({
+        interaction,
+        registerUI,
+        registerMessageFilters,
+      });
+    } else if (isContextMenuCommand(command) && interaction.isContextMenu()) {
+      await command.run({
+        interaction,
+        registerUI,
+        registerMessageFilters,
+      });
+    } else {
+      throw new Error(`Invalid Command type: "${command.type}`);
+    }
   } catch (error) {
     if (client.onError) {
       client.onError(command, error);
