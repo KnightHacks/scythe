@@ -25,11 +25,13 @@ function normalizeOption(option: ApplicationCommandOptionData): ApplicationComma
   return option;
 }
 
+// TODO: Replace when https://github.com/discordjs/discord.js/pull/6410 is merged.
 export function isChatInputCommand(commandData: ApplicationCommandData): commandData is ChatInputApplicationCommandData {
   return commandData.type === 'CHAT_INPUT' || 
          commandData.type === Constants.ApplicationCommandTypes.CHAT_INPUT;
 }
 
+// TODO: Replace when https://github.com/discordjs/discord.js/pull/6410 is merged.
 export function isContextMenuCommand(commandData: ApplicationCommandData): commandData is (MessageApplicationCommandData | UserApplicationCommandData) {
   return commandData.type === 'MESSAGE' || 
          commandData.type === 'USER' || 
@@ -37,6 +39,7 @@ export function isContextMenuCommand(commandData: ApplicationCommandData): comma
          commandData.type === Constants.ApplicationCommandTypes.USER;
 }
 
+// TODO: Replace when https://github.com/discordjs/discord.js/pull/6410 is merged.
 export function isChoiceBasedOption(option: ApplicationCommandOptionData): option is ApplicationCommandChoicesData {
   return option.type === 'BOOLEAN' || 
          option.type === Constants.ApplicationCommandOptionTypes.BOOLEAN ||
@@ -48,6 +51,7 @@ export function isChoiceBasedOption(option: ApplicationCommandOptionData): optio
          option.type === Constants.ApplicationCommandOptionTypes.NUMBER;
 }
 
+// TODO: Replace when https://github.com/discordjs/discord.js/pull/6410 is merged.
 export function isSubOptionBasedOption(option: ApplicationCommandOptionData): option is (ApplicationCommandSubGroupData | ApplicationCommandSubGroupData)  {
   return option.type === 'SUB_COMMAND' ||
          option.type === 'SUB_COMMAND_GROUP';
