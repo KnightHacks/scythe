@@ -43,11 +43,11 @@ export class EventHandler {
       interaction = bindAllMethods(interaction);
       if (interaction.isCommand() || interaction.isContextMenu()) {
         dispatch(
-          client,
           interaction,
           this.commands,
           this.registerUI,
-          this.registerMessageFilters
+          this.registerMessageFilters,
+          client.onError,
         );
       } else if (interaction.isButton()) {
         const handler = this.buttonListeners.get(interaction.customId);

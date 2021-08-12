@@ -1,15 +1,14 @@
 import { CommandInteraction, ContextMenuInteraction, MessageActionRow } from 'discord.js';
-import { Client } from '.';
 import { Command, RawCommand } from './Command';
 import { MessageFilter } from './messageFilters';
 import { UI } from './UI';
 
 export async function dispatch(
-  client: Client,
   interaction: CommandInteraction | ContextMenuInteraction,
   commands: Command[],
   registerUI: (ui: UI) => MessageActionRow[],
-  registerMessageFilters: (filters: MessageFilter[]) => void
+  registerMessageFilters: (filters: MessageFilter[]) => void,
+  onError: (command: Command, error: Error) => void,
 ): Promise<void> {
   // FIXME O(n) performance
   const command = commands.find((c) => c.name === interaction.commandName) as RawCommand;
@@ -51,8 +50,6 @@ export async function dispatch(
       registerMessageFilters,
     });
   } catch (error) {
-    if (client.onError) {
-      client.onError(command, error);
-    }
+    onError(command, error);
   }
 }
