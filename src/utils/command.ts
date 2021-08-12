@@ -1,5 +1,4 @@
-import { ApplicationCommandOptionData, ApplicationCommandData } from 'discord.js';
-import { ApplicationCommandTypes } from 'discord.js/typings/enums';
+import { ApplicationCommandOptionData, ApplicationCommandData, Constants, ChatInputApplicationCommandData, MessageApplicationCommandData, UserApplicationCommandData } from 'discord.js';
 
 function normalizeOption(option: ApplicationCommandOptionData): ApplicationCommandOptionData {
   if (!option.required) {
@@ -21,13 +20,25 @@ function normalizeOption(option: ApplicationCommandOptionData): ApplicationComma
   
   return option;
 }
+
+export function isChatInputCommand(commandData: ApplicationCommandData): commandData is ChatInputApplicationCommandData {
+  return commandData.type === 'CHAT_INPUT' || 
+         commandData.type === Constants.ApplicationCommandTypes.CHAT_INPUT;
+}
+
+export function isContextMenuCommand(commandData: ApplicationCommandData): commandData is (MessageApplicationCommandData | UserApplicationCommandData) {
+  return commandData.type === 'MESSAGE' || 
+         commandData.type === 'USER' || 
+         commandData.type === Constants.ApplicationCommandTypes.MESSAGE || 
+         commandData.type === Constants.ApplicationCommandTypes.USER;
+}
   
 export function toData(command: ApplicationCommandData): ApplicationCommandData {
 
   const name = command.name;
 
   // Normalize all of the options.
-  if (command.type === 'CHAT_INPUT' || command.type === ApplicationCommandTypes.CHAT_INPUT) {
+  if (isChatInputCommand(command)) {
     // Normalize all of the options.
     const newOptions = command.options?.map(normalizeOption);
 
