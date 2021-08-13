@@ -32,7 +32,7 @@ export type CommandBase<T extends CommandInteraction> = ApplicationCommandData &
      * The static user permissions for this commands
      */
   allowedUsers?: Snowflake[];
-  
+
   /**
      * The {@link PermissionHandler} that handles the permissions for this command.
      */
