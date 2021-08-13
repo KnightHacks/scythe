@@ -15,7 +15,7 @@ function normalizeOption(option: ApplicationCommandOptionData): ApplicationComma
       option.options = undefined;
     } else {
       // Recurse through sub options.
-      option.options.map(normalizeOption);
+      option.options.forEach(normalizeOption);
     }
   }
 
