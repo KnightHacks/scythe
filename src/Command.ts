@@ -1,34 +1,42 @@
 import {
-  ApplicationCommandOptionData,
+  ApplicationCommandData,
+  ChatInputApplicationCommandData,
   CommandInteraction,
+  ContextMenuInteraction,
+  Interaction,
   MessageActionRow,
+  MessageApplicationCommandData,
   Snowflake,
+  UserApplicationCommandData,
 } from 'discord.js';
 import { MessageFilter } from './messageFilters';
 import { UI } from './UI';
+
+export type CommandRunner<T extends Interaction> = ({ interaction, registerUI, registerMessageFilters }: {
+  interaction: T;
+  registerUI: (ui: UI) => MessageActionRow[];
+  registerMessageFilters: (filters: MessageFilter[]) => void;
+}) => Promise<void> | void;
 
 export type PermissionHandler = (
   interaction: CommandInteraction
 ) => boolean | string | Promise<string | boolean>;
 
-/**
- * Represents a the blueprint for a slash commands.
- */
-export interface Command {
+export type CommandBase<T extends CommandInteraction> = ApplicationCommandData & {
   /**
-   * The name of the command.
+   * The static role permissions for this command.
    */
-  get name(): string;
+  allowedRoles?: Snowflake[];
 
   /**
-   * The description of the command.
-   */
-  get description(): string;
+     * The static user permissions for this commands
+     */
+  allowedUsers?: Snowflake[];
 
   /**
-   * The options available for this command.
-   */
-  readonly options?: ApplicationCommandOptionData[];
+     * The {@link PermissionHandler} that handles the permissions for this command.
+     */
+  readonly permissionHandler?: PermissionHandler;
 
   /**
    * The function that gets executed after the command is invoked.
@@ -39,30 +47,17 @@ export interface Command {
    * @param args.registerMessageFilters Registers a callback that receives all
    * messages and deletes a message if the callback returns false
    */
-  run({
-    interaction,
-    registerUI,
-  }: {
-    interaction: CommandInteraction;
-    registerUI: (ui: UI) => MessageActionRow[];
-    registerMessageFilters: (filters: MessageFilter[]) => void;
-  }): Promise<void> | void;
+  run: CommandRunner<T>;
+};
 
-  /**
-   * The static role permissions for this command.
-   */
-  allowedRoles?: Snowflake[];
+export type ContextMenuCommand = CommandBase<ContextMenuInteraction> & (UserApplicationCommandData | MessageApplicationCommandData);
 
-  /**
-   * The static user permissions for this commands
-   */
-  allowedUsers?: Snowflake[];
+export type SlashCommand = CommandBase<CommandInteraction> & ChatInputApplicationCommandData;
 
-  /**
-   * The {@link PermissionHandler} that handles the permissions for this command.
-   */
-  readonly permissionHandler?: PermissionHandler;
-}
+export type Command = ContextMenuCommand | SlashCommand;
+
+// This type is only for type erasure in dispatch.ts
+export type RawCommand = CommandBase<ContextMenuInteraction | CommandInteraction> & Command;
 
 /**
  * Returns whether an object of unknown type is a Command.
@@ -76,7 +71,7 @@ export function isCommand(maybeCommand: unknown): maybeCommand is Command {
   }
 
   // Iterate through required command properties
-  const requiredProps = ['name', 'description', 'run'];
+  const requiredProps = ['name', 'run'];
 
   let retVal = true;
   requiredProps.forEach((prop) => {

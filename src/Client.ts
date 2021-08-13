@@ -91,7 +91,7 @@ export default class Client extends discord.Client {
     await push();
   }
 
-  async pushCommands(appCommands: ApplicationCommandData[]): Promise<void> {
+  async pushCommands(appCommands: Command[]): Promise<void> {
     let guild: Guild | undefined = undefined;
     if (process.env.GUILD_ID) {
       guild = this.guilds.cache.get(process.env.GUILD_ID);

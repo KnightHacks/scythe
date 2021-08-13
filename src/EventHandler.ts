@@ -41,7 +41,7 @@ export class EventHandler {
     // handle incoming interactions
     client.on('interactionCreate', (interaction) => {
       interaction = bindAllMethods(interaction);
-      if (interaction.isCommand()) {
+      if (interaction.isCommand() || interaction.isContextMenu()) {
         dispatch(
           interaction,
           this.commands,
