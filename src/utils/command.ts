@@ -21,13 +21,13 @@ function normalizeOption(option: ApplicationCommandOptionData): ApplicationComma
       option.options.map(normalizeOption);
     }
   }
-  
+
   return option;
 }
 
 // TODO: Replace when https://github.com/discordjs/discord.js/pull/6410 is merged.
 export function isChoiceBasedOption(option: ApplicationCommandOptionData): option is ApplicationCommandChoicesData {
-  return option.type === 'BOOLEAN' || 
+  return option.type === 'BOOLEAN' ||
          option.type === Constants.ApplicationCommandOptionTypes.BOOLEAN ||
          option.type === 'INTEGER' ||
          option.type === Constants.ApplicationCommandOptionTypes.INTEGER ||
@@ -42,7 +42,7 @@ export function isSubOptionBasedOption(option: ApplicationCommandOptionData): op
   return option.type === 'SUB_COMMAND' ||
          option.type === 'SUB_COMMAND_GROUP';
 }
-  
+
 export function toData(command: ApplicationCommandData): ApplicationCommandData {
   // Normalize all of the options.
   if (!command.type || command.type === 'CHAT_INPUT' || command.type === Constants.ApplicationCommandTypes.CHAT_INPUT) {
