@@ -1,16 +1,13 @@
 import { ApplicationCommandOptionData, ApplicationCommandData, Constants, ApplicationCommandChoicesData, ApplicationCommandSubGroupData } from 'discord.js';
 
 function normalizeOption(option: ApplicationCommandOptionData): ApplicationCommandOptionData {
-  if (!option.required) {
-    option.required = false; // Default for required
-  }
+  // Default for required
+  option.required = option.required ?? false;
 
   if (isChoiceBasedOption(option)) {
     // These stubs are needed for deep comparisons
     // because discord.js return values set to undefined.
-    if (!option.choices) {
-      option.choices = undefined;
-    }
+    option.choices = option.choices ?? undefined;
   }
 
   if (isSubOptionBasedOption(option)) {
