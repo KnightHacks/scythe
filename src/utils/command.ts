@@ -44,24 +44,20 @@ export function isSubOptionBasedOption(option: ApplicationCommandOptionData): op
 }
   
 export function toData(command: ApplicationCommandData): ApplicationCommandData {
-
-  const name = command.name;
-
   // Normalize all of the options.
-  if (command.type === 'CHAT_INPUT' || command.type === Constants.ApplicationCommandTypes.CHAT_INPUT) {
+  if (!command.type || command.type === 'CHAT_INPUT' || command.type === Constants.ApplicationCommandTypes.CHAT_INPUT) {
     // Normalize all of the options.
     const newOptions = command.options?.map(normalizeOption);
-
     return {
       type: command.type,
-      name,
+      name: command.name,
       description: command.description,
       options: newOptions ?? [],
     };
   } else {
     return {
       type: command.type,
-      name,
+      name: command.name,
     };
   }
 }
