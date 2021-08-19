@@ -4,7 +4,6 @@ import discord, {
   ApplicationCommandPermissionData,
   ClientOptions,
   Collection,
-  Guild,
   GuildApplicationCommandPermissionData,
   Snowflake,
 } from 'discord.js';
@@ -15,6 +14,7 @@ import { EventHandler } from './EventHandler';
 import { toData } from './utils/command';
 
 export default class Client extends discord.Client {
+  private guildID?: Snowflake;
   private commands = new Collection<string, Command>();
   public onError: (command: Command, error: Error) => void = (command, error) => {
     console.error(`There was an error in the ${command.name} command.`);
@@ -29,19 +29,23 @@ export default class Client extends discord.Client {
     super(options);
   }
 
+  /**
+   * Tells the client to register commands to this guild only.
+   * @param id The ID of the guild to target.
+   */
+  setGuildID(id: Snowflake): void {
+    this.guildID = id;
+  }
+
   async syncCommands(commands: Command[]): Promise<void> {
     if (!this.isReady()) {
       throw new Error('This must be used after the client is ready.');
     }
-
-    if (!process.env.GUILD_ID) {
-      throw new Error('Please set the GUILD_ID in your .env file.');
-    }
-
+    
     // Fetch the commands from the server.
     const rawCommands =
-      process.env.NODE_ENV === 'development'
-        ? await this.guilds.cache.get(process.env.GUILD_ID)?.commands.fetch()
+      this.guildID
+        ? await this.guilds.cache.get(this.guildID)?.commands.fetch()
         : await this.application.commands.fetch();
 
     if (!rawCommands) {
@@ -92,44 +96,39 @@ export default class Client extends discord.Client {
   }
 
   async pushCommands(appCommands: Command[]): Promise<void> {
-    let guild: Guild | undefined = undefined;
-    if (process.env.GUILD_ID) {
-      guild = this.guilds.cache.get(process.env.GUILD_ID);
-    } else {
-      throw new Error('No GUILD_ID found!');
-    }
-
-    if (!guild) {
-      throw new Error('Guild is not initialized, check your GUILD_ID.');
-    }
-
     let pushedCommands: ApplicationCommand[] | undefined;
 
     // Guild commands propogate instantly, but application commands do not
     // so we only want to use guild commands when in development.
-    if (process.env.NODE_ENV === 'development') {
+    if (this.guildID) {
+      const guild = this.guilds.cache.get(this.guildID);
+
+      if (!guild) {
+        throw new Error('Guild is not initialized, check your GUILD_ID.');
+      }
+
       console.log(
-        'Development environment detected..., using guild commands instead of application commands.'
+        'Guild ID set..., using guild commands instead of application commands.'
       );
 
       pushedCommands = await guild.commands
         .set(appCommands)
         .then((x) => [...x.values()]);
+
+      if (!pushedCommands) {
+        return;
+      }
+
+      const fullPermissions: GuildApplicationCommandPermissionData[] =
+      generatePermissionData(pushedCommands, [...this.commands.values()]);
+  
+      // Apply Permissions (per-guild-only)
+      await guild.commands.permissions.set({ fullPermissions });
     } else {
       pushedCommands = await this.application?.commands
         .set(appCommands)
         .then((x) => [...x.values()]);
     }
-
-    if (!pushedCommands) {
-      return;
-    }
-
-    const fullPermissions: GuildApplicationCommandPermissionData[] =
-      generatePermissionData(pushedCommands, [...this.commands.values()]);
-
-    // Apply Permissions (per-guild-only)
-    await guild.commands.permissions.set({ fullPermissions });
   }
 
   /**
