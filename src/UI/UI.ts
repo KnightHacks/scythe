@@ -5,25 +5,19 @@ import {
   MessageSelectOptionData,
 } from 'discord.js';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  Button,
-  ButtonHandler,
-  isLinkButton,
-  isRegularButton,
-  LinkButton,
-} from './Button';
+import { Button, ButtonHandler, isLinkButton, isRegularButton, LinkButton } from './Button';
 import { SelectMenu, SelectMenuHandler, SelectOption } from './SelectMenu';
 
 export type UI = UIComponent | Row | [Row, Row?, Row?, Row?, Row?];
 
 export type Row =
   | [
-    Button | LinkButton,
+      Button | LinkButton,
       (Button | LinkButton)?,
       (Button | LinkButton)?,
       (Button | LinkButton)?,
       (Button | LinkButton)?
-  ]
+    ]
   | [SelectMenu];
 
 export type UIComponent = Button | LinkButton | SelectMenu;
@@ -34,15 +28,11 @@ export function toDiscordUI(
   selectMenuListeners: Map<string, SelectMenuHandler>
 ): MessageActionRow[] {
   const normalizedUI = normalizeUI(components);
-  const configInRows: (MessageButtonOptions | MessageSelectMenuOptions)[][] =
-    normalizedUI.map((row) =>
-      row.map((component) =>
-        toDiscordComponent(component, buttonListeners, selectMenuListeners)
-      )
-    );
-  return configInRows.map((row) =>
-    new MessageActionRow().addComponents(...row)
+  const configInRows: (MessageButtonOptions | MessageSelectMenuOptions)[][] = normalizedUI.map(
+    (row) =>
+      row.map((component) => toDiscordComponent(component, buttonListeners, selectMenuListeners))
   );
+  return configInRows.map((row) => new MessageActionRow().addComponents(...row));
 }
 
 function toDiscordComponent(
@@ -63,9 +53,8 @@ function toDiscordComponent(
     return { ...buttonOptions, type: 'BUTTON', customId: id };
   } else {
     const { onSelect, options: optionOptions, ...selectOptions } = options;
-    const discordOptionOptions: MessageSelectOptionData[] = optionOptions.map(
-      toDiscordSelectOptionData
-    );
+    const discordOptionOptions: MessageSelectOptionData[] =
+      optionOptions.map(toDiscordSelectOptionData);
     const id = getID(selectOptions.placeholder ?? '<noplaceholder>', 'select');
     selectMenuListeners.set(id, onSelect);
     return {
@@ -102,9 +91,7 @@ function normalizeUI(ui: UI): UIComponent[][] {
   }
 }
 
-function toDiscordSelectOptionData(
-  option: SelectOption
-): MessageSelectOptionData {
+function toDiscordSelectOptionData(option: SelectOption): MessageSelectOptionData {
   const { value, ...rest } = option;
   if (value === undefined) {
     return {

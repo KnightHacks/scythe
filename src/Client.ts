@@ -41,12 +41,11 @@ export default class Client extends discord.Client {
     if (!this.isReady()) {
       throw new Error('This must be used after the client is ready.');
     }
-    
+
     // Fetch the commands from the server.
-    const rawCommands =
-      this.guildID
-        ? await this.guilds.cache.get(this.guildID)?.commands.fetch()
-        : await this.application.commands.fetch();
+    const rawCommands = this.guildID
+      ? await this.guilds.cache.get(this.guildID)?.commands.fetch()
+      : await this.application.commands.fetch();
 
     if (!rawCommands) {
       throw new Error('Could not fetch remote commands!');
@@ -107,21 +106,19 @@ export default class Client extends discord.Client {
         throw new Error('Guild is not initialized, check your GUILD_ID.');
       }
 
-      console.log(
-        'Guild ID set..., using guild commands instead of application commands.'
-      );
+      console.log('Guild ID set..., using guild commands instead of application commands.');
 
-      pushedCommands = await guild.commands
-        .set(appCommands)
-        .then((x) => [...x.values()]);
+      pushedCommands = await guild.commands.set(appCommands).then((x) => [...x.values()]);
 
       if (!pushedCommands) {
         return;
       }
 
-      const fullPermissions: GuildApplicationCommandPermissionData[] =
-      generatePermissionData(pushedCommands, [...this.commands.values()]);
-  
+      const fullPermissions: GuildApplicationCommandPermissionData[] = generatePermissionData(
+        pushedCommands,
+        [...this.commands.values()]
+      );
+
       // Apply Permissions (per-guild-only)
       await guild.commands.permissions.set({ fullPermissions });
     } else {
@@ -164,9 +161,7 @@ function generatePermissionData(
   commands: Command[]
 ): GuildApplicationCommandPermissionData[] {
   return pushedCommands.map((appCommand) => {
-    const command: Command | undefined = commands.find(
-      (c) => c.name === appCommand.name
-    );
+    const command: Command | undefined = commands.find((c) => c.name === appCommand.name);
     const permissions = generateAllPermissions(
       command?.allowedRoles ?? [],
       command?.allowedUsers ?? []
@@ -187,9 +182,7 @@ function generateAllPermissions(
   return rolePermissions.concat(userPermissions);
 }
 
-function generateRolePermissions(
-  allowedRoles: Snowflake[]
-): ApplicationCommandPermissionData[] {
+function generateRolePermissions(allowedRoles: Snowflake[]): ApplicationCommandPermissionData[] {
   return allowedRoles.map(
     (role): ApplicationCommandPermissionData => ({
       type: 'ROLE',
@@ -199,9 +192,7 @@ function generateRolePermissions(
   );
 }
 
-function generateUserPermissions(
-  allowedUsers: Snowflake[]
-): ApplicationCommandPermissionData[] {
+function generateUserPermissions(allowedUsers: Snowflake[]): ApplicationCommandPermissionData[] {
   return allowedUsers.map(
     (user): ApplicationCommandPermissionData => ({
       type: 'USER',

@@ -47,7 +47,7 @@ export class EventHandler {
           this.commands,
           this.registerUI,
           this.registerMessageFilters,
-          client.onError,
+          client.onError
         );
       } else if (interaction.isButton()) {
         const handler = this.buttonListeners.get(interaction.customId);

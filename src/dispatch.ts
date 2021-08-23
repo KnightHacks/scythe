@@ -8,7 +8,7 @@ export async function dispatch(
   commands: Command[],
   registerUI: (ui: UI) => MessageActionRow[],
   registerMessageFilters: (filters: MessageFilter[]) => void,
-  onError: (command: Command, error: Error) => void,
+  onError: (command: Command, error: Error) => void
 ): Promise<void> {
   // FIXME O(n) performance
   const command = commands.find((c) => c.name === interaction.commandName) as RawCommand;
