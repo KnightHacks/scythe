@@ -3,7 +3,11 @@ import path from 'path';
 
 export type TypeGuard<T> = (type: unknown) => type is T;
 
-export async function loadStructures<T>(dir: string, typeChecker: TypeGuard<T>, recursive = true): Promise<T[]> {
+export async function loadStructures<T>(
+  dir: string,
+  typeChecker: TypeGuard<T>,
+  recursive = true
+): Promise<T[]> {
   const structures: T[] = [];
 
   // Check if path is directory
@@ -40,23 +44,21 @@ export async function loadStructures<T>(dir: string, typeChecker: TypeGuard<T>, 
     }
 
     // Dynamically import command file.
-    const { default: structure }: { default: unknown } = await import(
-      importPath
-    ).catch((err) => {
+    const { default: structure }: { default: unknown } = await import(importPath).catch((err) => {
       console.log(err);
       throw new Error(`Could not load structure from file: ${file}`);
     });
 
     // Check if it exported properly.
     if (!structure) {
-      throw new Error(
-        `${file} does not export a default export.`
-      );
+      throw new Error(`${file} does not export a default export.`);
     }
 
     // Run Type checks.
     if (!typeChecker(structure)) {
-      throw new Error(`Cannot load structure at file: ${file}, because it doesn't conform to a proper type.`);
+      throw new Error(
+        `Cannot load structure at file: ${file}, because it doesn't conform to a proper type.`
+      );
     }
 
     structures.push(structure);

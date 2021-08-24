@@ -12,7 +12,11 @@ import {
 import { MessageFilter } from './messageFilters';
 import { UI } from './UI';
 
-export type CommandRunner<T extends Interaction> = ({ interaction, registerUI, registerMessageFilters }: {
+export type CommandRunner<T extends Interaction> = ({
+  interaction,
+  registerUI,
+  registerMessageFilters,
+}: {
   interaction: T;
   registerUI: (ui: UI) => MessageActionRow[];
   registerMessageFilters: (filters: MessageFilter[]) => void;
@@ -29,13 +33,13 @@ export type CommandBase<T extends CommandInteraction> = ApplicationCommandData &
   allowedRoles?: Snowflake[];
 
   /**
-     * The static user permissions for this commands
-     */
+   * The static user permissions for this commands
+   */
   allowedUsers?: Snowflake[];
 
   /**
-     * The {@link PermissionHandler} that handles the permissions for this command.
-     */
+   * The {@link PermissionHandler} that handles the permissions for this command.
+   */
   readonly permissionHandler?: PermissionHandler;
 
   /**
@@ -50,7 +54,8 @@ export type CommandBase<T extends CommandInteraction> = ApplicationCommandData &
   run: CommandRunner<T>;
 };
 
-export type ContextMenuCommand = CommandBase<ContextMenuInteraction> & (UserApplicationCommandData | MessageApplicationCommandData);
+export type ContextMenuCommand = CommandBase<ContextMenuInteraction> &
+  (UserApplicationCommandData | MessageApplicationCommandData);
 
 export type SlashCommand = CommandBase<CommandInteraction> & ChatInputApplicationCommandData;
 

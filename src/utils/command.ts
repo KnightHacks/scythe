@@ -1,4 +1,10 @@
-import { ApplicationCommandOptionData, ApplicationCommandData, Constants, ApplicationCommandChoicesData, ApplicationCommandSubGroupData } from 'discord.js';
+import {
+  ApplicationCommandOptionData,
+  ApplicationCommandData,
+  Constants,
+  ApplicationCommandChoicesData,
+  ApplicationCommandSubGroupData,
+} from 'discord.js';
 
 function normalizeOption(option: ApplicationCommandOptionData): ApplicationCommandOptionData {
   // Default for required
@@ -23,26 +29,35 @@ function normalizeOption(option: ApplicationCommandOptionData): ApplicationComma
 }
 
 // TODO: Replace when https://github.com/discordjs/discord.js/pull/6410 is merged.
-export function isChoiceBasedOption(option: ApplicationCommandOptionData): option is ApplicationCommandChoicesData {
-  return option.type === 'BOOLEAN' ||
-         option.type === Constants.ApplicationCommandOptionTypes.BOOLEAN ||
-         option.type === 'INTEGER' ||
-         option.type === Constants.ApplicationCommandOptionTypes.INTEGER ||
-         option.type === 'STRING' ||
-         option.type === Constants.ApplicationCommandOptionTypes.STRING ||
-         option.type === 'NUMBER' ||
-         option.type === Constants.ApplicationCommandOptionTypes.NUMBER;
+export function isChoiceBasedOption(
+  option: ApplicationCommandOptionData
+): option is ApplicationCommandChoicesData {
+  return (
+    option.type === 'BOOLEAN' ||
+    option.type === Constants.ApplicationCommandOptionTypes.BOOLEAN ||
+    option.type === 'INTEGER' ||
+    option.type === Constants.ApplicationCommandOptionTypes.INTEGER ||
+    option.type === 'STRING' ||
+    option.type === Constants.ApplicationCommandOptionTypes.STRING ||
+    option.type === 'NUMBER' ||
+    option.type === Constants.ApplicationCommandOptionTypes.NUMBER
+  );
 }
 
 // TODO: Replace when https://github.com/discordjs/discord.js/pull/6410 is merged.
-export function isSubOptionBasedOption(option: ApplicationCommandOptionData): option is (ApplicationCommandSubGroupData | ApplicationCommandSubGroupData)  {
-  return option.type === 'SUB_COMMAND' ||
-         option.type === 'SUB_COMMAND_GROUP';
+export function isSubOptionBasedOption(
+  option: ApplicationCommandOptionData
+): option is ApplicationCommandSubGroupData | ApplicationCommandSubGroupData {
+  return option.type === 'SUB_COMMAND' || option.type === 'SUB_COMMAND_GROUP';
 }
 
 export function toData(command: ApplicationCommandData): ApplicationCommandData {
   // Normalize all of the options.
-  if (!command.type || command.type === 'CHAT_INPUT' || command.type === Constants.ApplicationCommandTypes.CHAT_INPUT) {
+  if (
+    !command.type ||
+    command.type === 'CHAT_INPUT' ||
+    command.type === Constants.ApplicationCommandTypes.CHAT_INPUT
+  ) {
     // Normalize all of the options.
     const newOptions = command.options?.map(normalizeOption);
     return {

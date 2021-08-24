@@ -19,9 +19,7 @@ export type SelectMenu = Simplify<
   }
 >;
 
-export type SelectMenuHandler = (
-  interaction: SelectMenuInteraction
-) => void | Promise<void>;
+export type SelectMenuHandler = (interaction: SelectMenuInteraction) => void | Promise<void>;
 
 export function isSelectMenu(options: UIComponent): options is SelectMenu {
   return 'onSelect' in options;
