@@ -17,7 +17,7 @@
     "test": "jest ./src",
     "lint": "eslint ./src",
     "pre-commit": "lint-staged",
-    "postinstall": "husky install"
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
