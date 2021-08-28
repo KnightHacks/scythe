@@ -1,8 +1,14 @@
-import { ButtonInteraction, MessageButtonOptions, MessageButtonStyle } from 'discord.js';
+import {
+  ButtonInteraction,
+  MessageButtonOptions,
+  MessageButtonStyle,
+} from 'discord.js';
 import { Simplify } from '../utils/Simplify';
 import { UIComponent } from './UI';
 
-export type ButtonHandler = (interaction: ButtonInteraction) => void | Promise<void>;
+export type ButtonHandler = (
+  interaction: ButtonInteraction
+) => void | Promise<void>;
 
 export type Button = Simplify<
   Omit<MessageButtonOptions, 'customId' | 'type'> & {

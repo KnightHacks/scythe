@@ -53,7 +53,9 @@ export function checkOne(...handlers: PermissionHandler[]): PermissionHandler {
  * @param flags The permission flags to check against.
  * @returns A permission handler.
  */
-export function hasClientFlags(...flags: PermissionResolvable[]): PermissionHandler {
+export function hasClientFlags(
+  ...flags: PermissionResolvable[]
+): PermissionHandler {
   return (interaction) => {
     const { user } = interaction.client;
     const { channel } = interaction;
@@ -76,7 +78,9 @@ export function hasClientFlags(...flags: PermissionResolvable[]): PermissionHand
  * @param flags The permission flags to check against
  * @returns A permission handler.
  */
-export function hasUserFlags(...flags: PermissionResolvable[]): PermissionHandler {
+export function hasUserFlags(
+  ...flags: PermissionResolvable[]
+): PermissionHandler {
   return (interaction) => {
     if (!interaction.member || !(interaction.member instanceof GuildMember)) {
       console.log(`Member invalid! Was ${interaction.member}`);
@@ -98,7 +102,8 @@ export function hasUserFlags(...flags: PermissionResolvable[]): PermissionHandle
   };
 }
 
-const hasID = (member: GuildMember, id: Snowflake) => member.roles.cache.has(id);
+const hasID = (member: GuildMember, id: Snowflake) =>
+  member.roles.cache.has(id);
 
 /**
  * A helper function to check if the given roles are present from an interaction.
@@ -116,7 +121,8 @@ export function allRoleNames(...roles: string[]): PermissionHandler {
     }
 
     roles.forEach(
-      (roleName) => (allowed &&= member.roles.cache.some((role) => role.name === roleName))
+      (roleName) =>
+        (allowed &&= member.roles.cache.some((role) => role.name === roleName))
     );
 
     // Iterate and check if roles are present.
@@ -212,7 +218,9 @@ export function inRoles(...roleIDs: Snowflake[]): PermissionHandler {
       return false;
     }
 
-    const allowed = member.roles.cache.some((role) => roleIDs.includes(role.id));
+    const allowed = member.roles.cache.some((role) =>
+      roleIDs.includes(role.id)
+    );
 
     if (!allowed) {
       return 'You must have one of the following roles to run this command:\n'.concat(
@@ -235,7 +243,8 @@ export function inChannelNames(...channels: string[]): PermissionHandler {
     const channelIDs = channels.map(
       (channelName) =>
         interaction.client.channels.cache.find(
-          (channel) => (<TextChannel | ThreadChannel>channel).name === channelName
+          (channel) =>
+            (<TextChannel | ThreadChannel>channel).name === channelName
         )?.id
     );
     if (!channelIDs || !interaction.channel) {

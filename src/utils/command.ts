@@ -6,7 +6,9 @@ import {
   ApplicationCommandSubGroupData,
 } from 'discord.js';
 
-function normalizeOption(option: ApplicationCommandOptionData): ApplicationCommandOptionData {
+function normalizeOption(
+  option: ApplicationCommandOptionData
+): ApplicationCommandOptionData {
   // Default for required
   option.required = option.required ?? false;
 
@@ -51,7 +53,9 @@ export function isSubOptionBasedOption(
   return option.type === 'SUB_COMMAND' || option.type === 'SUB_COMMAND_GROUP';
 }
 
-export function toData(command: ApplicationCommandData): ApplicationCommandData {
+export function toData(
+  command: ApplicationCommandData
+): ApplicationCommandData {
   // Normalize all of the options.
   if (
     !command.type ||

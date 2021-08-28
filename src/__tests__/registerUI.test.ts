@@ -5,7 +5,8 @@ import { SelectMenu, SelectOption } from '../UI';
 describe('toDiscordUI()', () => {
   let buttonListeners = new Map();
   let selectMenuListeners = new Map();
-  const registerUI = (ui: UI) => toDiscordUI(ui, buttonListeners, selectMenuListeners);
+  const registerUI = (ui: UI) =>
+    toDiscordUI(ui, buttonListeners, selectMenuListeners);
   beforeEach(() => {
     buttonListeners = new Map();
     selectMenuListeners = new Map();

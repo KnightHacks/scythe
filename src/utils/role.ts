@@ -1,6 +1,9 @@
 import { Guild, Snowflake } from 'discord.js';
 
-export function resolveRoleID(guild: Guild, roleName: string): Snowflake | null {
+export function resolveRoleID(
+  guild: Guild,
+  roleName: string
+): Snowflake | null {
   const retVal = guild.roles.cache.find((role) => role.name === roleName);
 
   if (!retVal) {
