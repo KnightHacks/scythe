@@ -12,6 +12,7 @@ import { Command, isCommand } from './Command';
 import { loadStructures } from './loaders';
 import { EventHandler } from './EventHandler';
 import { toData } from './utils/command';
+import ora from 'ora';
 
 export default class Client extends discord.Client {
   private guildID?: Snowflake;
@@ -41,6 +42,8 @@ export default class Client extends discord.Client {
   }
 
   async syncCommands(commands: Command[]): Promise<void> {
+    const spinner = ora('Syncing Commands').start();
+
     if (!this.isReady()) {
       throw new Error('This must be used after the client is ready.');
     }
@@ -55,7 +58,6 @@ export default class Client extends discord.Client {
     }
 
     // Normalize all of the commands.
-
     const appCommands = new Collection<string, ApplicationCommandData>();
     rawCommands.map(toData).forEach((data) => appCommands.set(data.name, data));
 
@@ -64,17 +66,15 @@ export default class Client extends discord.Client {
 
     // Helper for whenever there's a diff.
     const push = async () => {
-      console.log('Local commands differ from remote commands, syncing now...');
+      spinner.text =
+        'Local commands differ from remote commands, syncing now...';
       await this.pushCommands(commands);
-      console.log('Finished syncing');
+      spinner.succeed('Commands are synced.');
+      spinner.stop();
     };
 
     // If the length is not the same it's obvious that the commands aren't the same.
     if (appCommands.size !== clientCommands.size) {
-      console.log({
-        appCommands: appCommands.size,
-        commands: clientCommands.size,
-      });
       await push();
       return;
     }
@@ -90,7 +90,8 @@ export default class Client extends discord.Client {
 
     // There's no diff then the commands are in sync.
     if (!diff) {
-      console.log('Commands are already in sync, nothing to push...');
+      spinner.succeed('Commands are already in sync, nothing to push...');
+      spinner.stop();
       return;
     }
 
