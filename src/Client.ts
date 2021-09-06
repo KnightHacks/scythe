@@ -69,8 +69,7 @@ export default class Client extends discord.Client {
       spinner.text =
         'Local commands differ from remote commands, syncing now...';
       await this.pushCommands(commands);
-      spinner.succeed('Commands are synced.');
-      spinner.stop();
+      spinner.succeed();
     };
 
     // If the length is not the same it's obvious that the commands aren't the same.
@@ -109,10 +108,6 @@ export default class Client extends discord.Client {
       if (!guild) {
         throw new Error('Guild is not initialized, check your GUILD_ID.');
       }
-
-      console.log(
-        'Guild ID set..., using guild commands instead of application commands.'
-      );
 
       pushedCommands = await guild.commands
         .set(appCommands)
