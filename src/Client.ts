@@ -89,8 +89,8 @@ export default class Client extends discord.Client {
 
     // There's no diff then the commands are in sync.
     if (!diff) {
-      spinner.succeed('Commands are already in sync, nothing to push...');
-      spinner.stop();
+      spinner.text = 'Commands are already in sync, nothing to push...';
+      spinner.succeed();
       return;
     }
 
