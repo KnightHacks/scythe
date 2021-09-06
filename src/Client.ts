@@ -42,7 +42,7 @@ export default class Client extends discord.Client {
   }
 
   async syncCommands(commands: Command[]): Promise<void> {
-    const spinner = ora('Syncing Commands').start();
+    const spinner = ora('Syncing Commands...').start();
 
     if (!this.isReady()) {
       throw new Error('This must be used after the client is ready.');
