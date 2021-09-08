@@ -1,5 +1,5 @@
 {
-  "name": "@knighthacks/directive",
+  "name": "@knighthacks/scythe",
   "version": "0.1.0-dev",
   "type": "commonjs",
   "description": "A command-driven discord.js addon",
@@ -21,12 +21,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/KnightHacks/directive.git"
+    "url": "git://github.com/KnightHacks/scythe.git"
   },
   "author": "Suneet Tipirneni",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/KnightHacks/directive/issues"
+    "url": "https://github.com/KnightHacks/scythe/issues"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -34,7 +34,7 @@
       "eslint --fix"
     ]
   },
-  "homepage": "https://github.com/KnightHacks/directive#readme",
+  "homepage": "https://github.com/KnightHacks/scythe#readme",
   "devDependencies": {
     "@babel/core": "^7.14.6",
     "@babel/preset-env": "^7.14.7",
