@@ -17,6 +17,6 @@ jobs:
       - run: npm install
       - run: npm run build
       - run: npm version --git-tag-version=false $(jq --raw-output '.version' package.json)-$(git rev-parse --short HEAD)
-      - run: npm publish
+      - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
