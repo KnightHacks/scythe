@@ -19,6 +19,8 @@ export class EventHandler {
   messageFilters: MessageFilter[] = [];
   /** `Command`[] to register to listen for `CommandInteraction`s */
   commands: Command[] = [];
+  /** Stores commands that are cooling down */
+  private cooldowns = new Set<Command>();
 
   /**
    * @param client client used to register event handlers
@@ -47,7 +49,8 @@ export class EventHandler {
           this.commands,
           this.registerUI,
           this.registerMessageFilters,
-          client.onError
+          client.onError,
+          this.cooldowns
         );
       } else if (interaction.isButton()) {
         const handler = this.buttonListeners.get(interaction.customId);

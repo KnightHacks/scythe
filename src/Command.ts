@@ -44,6 +44,11 @@ export type CommandBase<T extends CommandInteraction> =
     readonly permissionHandler?: PermissionHandler;
 
     /**
+     * The number of seconds that must pass after each invocation of the command.
+     */
+    readonly cooldown?: number;
+
+    /**
      * The function that gets executed after the command is invoked.
      * @param args
      * @param args.interaction Interaction object from discord.js

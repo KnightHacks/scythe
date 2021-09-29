@@ -12,7 +12,8 @@ export async function dispatch(
   commands: Command[],
   registerUI: (ui: UI) => MessageActionRow[],
   registerMessageFilters: (filters: MessageFilter[]) => void,
-  onError: (command: Command, error: Error) => void
+  onError: (command: Command, error: Error) => void,
+  cooldowns: Set<Command>
 ): Promise<void> {
   // FIXME O(n) performance
   const command = commands.find(
@@ -49,6 +50,23 @@ export async function dispatch(
     }
   }
 
+  // Check cooldown.
+  if (cooldowns.has(command)) {
+    await interaction.reply({
+      content: 'Please wait for the cooldown to stop before using this again.',
+      ephemeral: true,
+    });
+    return;
+  }
+
+  if (command.cooldown) {
+    // Add to cooldown set.
+    cooldowns.add(command);
+
+    // Queue up its removal after cooldown duration.
+    setTimeout(() => cooldowns.delete(command), 1000 * command.cooldown);
+  }
+
   try {
     await command.run({
       interaction,
@@ -56,6 +74,6 @@ export async function dispatch(
       registerMessageFilters,
     });
   } catch (error) {
-    onError(command, error);
+    onError(command, error as Error);
   }
 }
