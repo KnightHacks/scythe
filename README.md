@@ -1,3 +1,3 @@
-# Dispatch
+# Scythe
 
-A discord.js command-driven addon.
+A tool for writing [Discord slash commands](https://discord.com/developers/docs/interactions/application-commands) quickly, easily, and with minimal boilerplate.
