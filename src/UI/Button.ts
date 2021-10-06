@@ -1,5 +1,6 @@
 import {
   ButtonInteraction,
+  LinkButtonOptions,
   MessageButtonOptions,
   MessageButtonStyle,
 } from 'discord.js';
@@ -18,7 +19,7 @@ export type Button = Simplify<
 >;
 
 export type LinkButton = Simplify<
-  Omit<MessageButtonOptions, 'customId' | 'type'> & {
+  Omit<LinkButtonOptions, 'customId' | 'type'> & {
     style: 'LINK';
     url: string;
   }
