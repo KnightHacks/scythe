@@ -3,6 +3,7 @@ import {
   ChatInputApplicationCommandData,
   CommandInteraction,
   ContextMenuInteraction,
+  GuildCommandInteraction,
   Interaction,
   MessageActionRow,
   MessageApplicationCommandData,
@@ -63,7 +64,7 @@ export type CommandBase<T extends CommandInteraction> =
 export type ContextMenuCommand = CommandBase<ContextMenuInteraction> &
   (UserApplicationCommandData | MessageApplicationCommandData);
 
-export type SlashCommand = CommandBase<CommandInteraction> &
+export type SlashCommand = CommandBase<GuildCommandInteraction<'cached'>> &
   ChatInputApplicationCommandData;
 
 export type Command = ContextMenuCommand | SlashCommand;

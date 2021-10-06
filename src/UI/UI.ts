@@ -1,7 +1,6 @@
 import {
   MessageActionRow,
-  MessageButtonOptions,
-  MessageSelectMenuOptions,
+  MessageActionRowComponentResolvable,
   MessageSelectOptionData,
 } from 'discord.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -34,7 +33,7 @@ export function toDiscordUI(
   selectMenuListeners: Map<string, SelectMenuHandler>
 ): MessageActionRow[] {
   const normalizedUI = normalizeUI(components);
-  const configInRows: (MessageButtonOptions | MessageSelectMenuOptions)[][] =
+  const configInRows: MessageActionRowComponentResolvable[][] =
     normalizedUI.map((row) =>
       row.map((component) =>
         toDiscordComponent(component, buttonListeners, selectMenuListeners)
@@ -49,7 +48,7 @@ function toDiscordComponent(
   options: UIComponent,
   buttonListeners: Map<string, ButtonHandler>,
   selectMenuListeners: Map<string, SelectMenuHandler>
-): MessageButtonOptions | MessageSelectMenuOptions {
+): MessageActionRowComponentResolvable {
   if (isLinkButton(options)) {
     return {
       ...options,

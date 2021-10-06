@@ -7,7 +7,6 @@ import discord, {
   GuildApplicationCommandPermissionData,
   Snowflake,
 } from 'discord.js';
-import { isEqual } from 'lodash';
 import { Command, isCommand } from './Command';
 import { loadStructures } from './loaders';
 import { EventHandler } from './EventHandler';
@@ -49,17 +48,13 @@ export default class Client extends discord.Client {
     }
 
     // Fetch the commands from the server.
-    const rawCommands = this.guildID
+    const APICommands = this.guildID
       ? await this.guilds.cache.get(this.guildID)?.commands.fetch()
       : await this.application.commands.fetch();
 
-    if (!rawCommands) {
+    if (!APICommands) {
       throw new Error('Could not fetch remote commands!');
     }
-
-    // Normalize all of the commands.
-    const appCommands = new Collection<string, ApplicationCommandData>();
-    rawCommands.map(toData).forEach((data) => appCommands.set(data.name, data));
 
     const clientCommands = new Collection<string, ApplicationCommandData>();
     commands.map(toData).forEach((data) => clientCommands.set(data.name, data));
@@ -73,18 +68,20 @@ export default class Client extends discord.Client {
     };
 
     // If the length is not the same it's obvious that the commands aren't the same.
-    if (appCommands.size !== clientCommands.size) {
+    if (APICommands.size !== clientCommands.size) {
       await push();
       return;
     }
 
     // Calculate if theres a diff between the local and remote commands.
-    const diff = !appCommands.every((appCommand) => {
-      // Get the name, and get the corresponding command with the same name.
-      const clientCommand = clientCommands.get(appCommand.name);
+    const diff = !APICommands.every((APICommand) => {
+      const compare = clientCommands.get(APICommand.name);
 
-      // Check if the commands are equal.
-      return isEqual(clientCommand, appCommand);
+      if (!compare) {
+        throw Error();
+      }
+
+      return APICommand.equals(compare);
     });
 
     // There's no diff then the commands are in sync.
