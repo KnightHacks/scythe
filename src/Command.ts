@@ -1,9 +1,9 @@
 import {
   ApplicationCommandData,
+  BaseCommandInteraction,
   ChatInputApplicationCommandData,
   CommandInteraction,
   ContextMenuInteraction,
-  GuildCommandInteraction,
   Interaction,
   MessageActionRow,
   MessageApplicationCommandData,
@@ -24,10 +24,10 @@ export type CommandRunner<T extends Interaction> = ({
 }) => Promise<void> | void;
 
 export type PermissionHandler = (
-  interaction: CommandInteraction
+  interaction: BaseCommandInteraction
 ) => boolean | string | Promise<string | boolean>;
 
-export type CommandBase<T extends CommandInteraction> =
+export type CommandBase<T extends BaseCommandInteraction> =
   ApplicationCommandData & {
     /**
      * The static role permissions for this command.
@@ -64,7 +64,7 @@ export type CommandBase<T extends CommandInteraction> =
 export type ContextMenuCommand = CommandBase<ContextMenuInteraction> &
   (UserApplicationCommandData | MessageApplicationCommandData);
 
-export type SlashCommand = CommandBase<GuildCommandInteraction<'cached'>> &
+export type SlashCommand = CommandBase<CommandInteraction<'cached'>> &
   ChatInputApplicationCommandData;
 
 export type Command = ContextMenuCommand | SlashCommand;

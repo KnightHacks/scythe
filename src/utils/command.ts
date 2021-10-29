@@ -10,7 +10,9 @@ function normalizeOption(
   option: ApplicationCommandOptionData
 ): ApplicationCommandOptionData {
   // Default for required
-  option.required = option.required ?? false;
+  if ('required' in option) {
+    option.required = option.required ?? false;
+  }
 
   if (isChoiceBasedOption(option)) {
     // These stubs are needed for deep comparisons
