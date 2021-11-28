@@ -1,5 +1,6 @@
 export { default as Client } from './Client';
 export * from './Command';
+export * from './AutocompleteHandler';
 export * from './dispatch';
 export * from './UI';
 export * from './utils/permissions';

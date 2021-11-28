@@ -12,6 +12,7 @@ import { loadStructures } from './loaders';
 import { EventHandler } from './EventHandler';
 import { toData } from './utils/command';
 import ora from 'ora';
+import { isAutocompleteHandler } from './AutocompleteHandler';
 
 export default class Client extends discord.Client {
   private guildID?: Snowflake;
@@ -124,6 +125,26 @@ export default class Client extends discord.Client {
         .set(appCommands)
         .then((x) => [...x.values()]);
     }
+  }
+
+  /**
+   * Registers the autocomplete handlers to be used by this client.
+   * @param dir he directory to load handlers from.
+   * @param recursive Whether or not to look for handlers recursively.
+   */
+  async registerAutocompleteHandlers(
+    dir: string,
+    recursive = true
+  ): Promise<void> {
+    const handlers = await loadStructures(
+      dir,
+      isAutocompleteHandler,
+      recursive
+    );
+
+    handlers.forEach((handler) =>
+      this.eventHandler.autoCompleteHandlers.set(handler.commandName, handler)
+    );
   }
 
   /**

@@ -36,9 +36,7 @@ export async function loadStructures<T>(
     }
 
     if (isDirectory && !recursive) {
-      throw new Error(
-        'Recursive structure loading is disabled, cannot load subdirectories.'
-      );
+      continue;
     }
 
     if (!importPath.endsWith('.ts') && !importPath.endsWith('.js')) {

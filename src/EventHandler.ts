@@ -1,5 +1,6 @@
 import { DMChannel, Message, MessageActionRow } from 'discord.js';
 import { Client } from '.';
+import { AutocompleteHandler } from './AutocompleteHandler';
 import { Command } from './Command';
 import { dispatch } from './dispatch';
 import { MessageFilter, runMessageFilters } from './messageFilters';
@@ -21,6 +22,8 @@ export class EventHandler {
   commands: Command[] = [];
   /** Stores commands that are cooling down */
   private cooldowns = new Set<Command>();
+  /** Handlers use to process autocomplete interactions */
+  autoCompleteHandlers: Map<string, AutocompleteHandler> = new Map();
 
   /**
    * @param client client used to register event handlers
@@ -66,6 +69,14 @@ export class EventHandler {
           return;
         }
         handler(interaction);
+      } else if (interaction.isAutocomplete()) {
+        const handler = this.autoCompleteHandlers.get(interaction.commandName);
+
+        if (!handler) {
+          return;
+        }
+
+        handler.onAutocomplete(interaction);
       } else {
         console.log('Unexpected interaction:');
         console.log(interaction);
