@@ -14,6 +14,10 @@ import { toData } from './utils/command';
 import ora from 'ora';
 import { isAutocompleteHandler } from './AutocompleteHandler';
 
+interface ScytheClientOptions extends ClientOptions {
+  guildID?: Snowflake;
+}
+
 export default class Client extends discord.Client {
   private guildID?: Snowflake;
   private commands = new Collection<string, Command>();
@@ -29,16 +33,9 @@ export default class Client extends discord.Client {
   /**
    * Handles commands for the bot.
    */
-  constructor(options: ClientOptions) {
-    super(options);
-  }
-
-  /**
-   * Tells the client to register commands to this guild only.
-   * @param id The ID of the guild to target.
-   */
-  setGuildID(id: Snowflake): void {
-    this.guildID = id;
+  constructor({ guildID, ...discordJsOptions }: ScytheClientOptions) {
+    super(discordJsOptions);
+    this.guildID = guildID;
   }
 
   async syncCommands(commands: Command[]): Promise<void> {
