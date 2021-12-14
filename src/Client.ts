@@ -16,6 +16,8 @@ import { isAutocompleteHandler } from './AutocompleteHandler';
 
 interface ScytheClientOptions extends ClientOptions {
   guildID?: Snowflake;
+  discordToken?: string;
+  commandsPath: string;
 }
 
 export default class Client extends discord.Client {
@@ -33,9 +35,21 @@ export default class Client extends discord.Client {
   /**
    * Handles commands for the bot.
    */
-  constructor({ guildID, ...discordJsOptions }: ScytheClientOptions) {
-    super(discordJsOptions);
-    this.guildID = guildID;
+  constructor(options: ClientOptions) {
+    super(options);
+  }
+
+  static async create({
+    guildID,
+    discordToken,
+    commandsPath,
+    ...discordJsOptions
+  }: ScytheClientOptions) {
+    const client = new Client(discordJsOptions);
+    client.guildID = guildID;
+    await client.login(discordToken);
+    await client.registerCommands(commandsPath);
+    return client;
   }
 
   async syncCommands(commands: Command[]): Promise<void> {
