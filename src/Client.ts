@@ -15,7 +15,7 @@ import ora from 'ora';
 import { isAutocompleteHandler } from './AutocompleteHandler';
 
 interface ScytheClientOptions extends ClientOptions {
-  guildID?: Snowflake;
+  guildID: Snowflake;
   discordToken?: string;
   commandsPath: string;
 }
