@@ -19,6 +19,7 @@ interface ScytheClientOptions extends ClientOptions {
   guildID: Snowflake;
   discordToken?: string;
   commandsPath: string;
+  autoCompletePath?: string;
   messageFilters?: MessageFilter[];
 }
 
@@ -45,6 +46,7 @@ export default class Client extends discord.Client {
     guildID,
     discordToken,
     commandsPath,
+    autoCompletePath,
     messageFilters,
     ...discordJsOptions
   }: ScytheClientOptions) {
@@ -52,6 +54,9 @@ export default class Client extends discord.Client {
     client.guildID = guildID;
     await client.login(discordToken);
     await client.registerCommands(commandsPath);
+    if (autoCompletePath) {
+      client.registerAutocompleteHandlers(autoCompletePath);
+    }
     if (messageFilters) {
       client.registerMessageFilters(messageFilters);
     }
