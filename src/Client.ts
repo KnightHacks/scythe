@@ -13,11 +13,13 @@ import { EventHandler } from './EventHandler';
 import { toData } from './utils/command';
 import ora from 'ora';
 import { isAutocompleteHandler } from './AutocompleteHandler';
+import { MessageFilter } from './messageFilters';
 
 interface ScytheClientOptions extends ClientOptions {
   guildID: Snowflake;
   discordToken?: string;
   commandsPath: string;
+  messageFilters?: MessageFilter[];
 }
 
 export default class Client extends discord.Client {
@@ -43,12 +45,16 @@ export default class Client extends discord.Client {
     guildID,
     discordToken,
     commandsPath,
+    messageFilters,
     ...discordJsOptions
   }: ScytheClientOptions) {
     const client = new Client(discordJsOptions);
     client.guildID = guildID;
     await client.login(discordToken);
     await client.registerCommands(commandsPath);
+    if (messageFilters) {
+      client.registerMessageFilters(messageFilters);
+    }
     return client;
   }
 
