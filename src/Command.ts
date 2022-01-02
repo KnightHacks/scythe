@@ -7,8 +7,10 @@ import {
   Interaction,
   MessageActionRow,
   MessageApplicationCommandData,
+  MessageContextMenuInteraction,
   Snowflake,
   UserApplicationCommandData,
+  UserContextMenuInteraction,
 } from 'discord.js';
 import { MessageFilter } from './messageFilters';
 import { UI } from './UI';
@@ -61,8 +63,19 @@ export type CommandBase<T extends BaseCommandInteraction> =
     run: CommandRunner<T>;
   };
 
-export type ContextMenuCommand = CommandBase<ContextMenuInteraction> &
-  (UserApplicationCommandData | MessageApplicationCommandData);
+export type UserContextMenuCommand = CommandBase<
+  UserContextMenuInteraction<'cached'>
+> &
+  UserApplicationCommandData;
+
+export type MessageContextMenuCommand = CommandBase<
+  MessageContextMenuInteraction<'cached'>
+> &
+  MessageApplicationCommandData;
+
+export type ContextMenuCommand =
+  | UserContextMenuCommand
+  | MessageContextMenuCommand;
 
 export type SlashCommand = CommandBase<CommandInteraction<'cached'>> &
   ChatInputApplicationCommandData;
