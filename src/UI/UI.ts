@@ -96,6 +96,7 @@ function normalizeUI(ui: UI): UIComponent[][] {
       return ui as UIComponent[][];
     } else {
       // only a 1d array, so wrap in an array once
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       return [ui as UIComponent[]];
     }
   }
