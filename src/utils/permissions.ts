@@ -1,7 +1,6 @@
 import {
   GuildMember,
   PermissionResolvable,
-  Permissions,
   Snowflake,
   TextChannel,
   ThreadChannel,

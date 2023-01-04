@@ -1,35 +1,29 @@
 import {
   ApplicationCommandData,
-  BaseCommandInteraction,
   ChatInputApplicationCommandData,
   CommandInteraction,
-  ContextMenuInteraction,
-  Interaction,
-  MessageActionRow,
+  ContextMenuCommandInteraction,
   MessageApplicationCommandData,
-  MessageContextMenuInteraction,
+  MessageContextMenuCommandInteraction,
   Snowflake,
   UserApplicationCommandData,
-  UserContextMenuInteraction,
+  UserContextMenuCommandInteraction,
 } from 'discord.js';
 import { MessageFilter } from './messageFilters';
-import { UI } from './UI';
 
-export type CommandRunner<T extends Interaction> = ({
+export type CommandRunner<T extends CommandInteraction> = ({
   interaction,
-  registerUI,
   registerMessageFilters,
 }: {
   interaction: T;
-  registerUI: (ui: UI) => MessageActionRow[];
   registerMessageFilters: (filters: MessageFilter[]) => void;
 }) => Promise<void> | void;
 
 export type PermissionHandler = (
-  interaction: BaseCommandInteraction
+  interaction: CommandInteraction
 ) => boolean | string | Promise<string | boolean>;
 
-export type CommandBase<T extends BaseCommandInteraction> =
+export type CommandBase<T extends CommandInteraction> =
   ApplicationCommandData & {
     /**
      * The static role permissions for this command.
@@ -64,12 +58,12 @@ export type CommandBase<T extends BaseCommandInteraction> =
   };
 
 export type UserContextMenuCommand = CommandBase<
-  UserContextMenuInteraction<'cached'>
+  UserContextMenuCommandInteraction<'cached'>
 > &
   UserApplicationCommandData;
 
 export type MessageContextMenuCommand = CommandBase<
-  MessageContextMenuInteraction<'cached'>
+  MessageContextMenuCommandInteraction<'cached'>
 > &
   MessageApplicationCommandData;
 
@@ -84,7 +78,7 @@ export type Command = ContextMenuCommand | SlashCommand;
 
 // This type is only for type erasure in dispatch.ts
 export type RawCommand = CommandBase<
-  ContextMenuInteraction | CommandInteraction
+  ContextMenuCommandInteraction | CommandInteraction
 > &
   Command;
 

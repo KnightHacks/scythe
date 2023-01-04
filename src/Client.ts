@@ -1,10 +1,8 @@
 import discord, {
   ApplicationCommand,
   ApplicationCommandData,
-  ApplicationCommandPermissionData,
   ClientOptions,
   Collection,
-  GuildApplicationCommandPermissionData,
   Snowflake,
 } from 'discord.js';
 import { Command, isCommand } from './Command';
@@ -114,12 +112,6 @@ export default class Client extends discord.Client {
       if (!pushedCommands) {
         return;
       }
-
-      const fullPermissions: GuildApplicationCommandPermissionData[] =
-        generatePermissionData(pushedCommands, [...this.commands.values()]);
-
-      // Apply Permissions (per-guild-only)
-      await guild.commands.permissions.set({ fullPermissions });
     } else {
       pushedCommands = await this.application?.commands
         .set(appCommands)
@@ -173,56 +165,4 @@ export default class Client extends discord.Client {
   }
 
   registerMessageFilters = this.eventHandler.registerMessageFilters;
-}
-
-function generatePermissionData(
-  pushedCommands: ApplicationCommand[],
-  commands: Command[]
-): GuildApplicationCommandPermissionData[] {
-  return pushedCommands.map((appCommand) => {
-    const command: Command | undefined = commands.find(
-      (c) => c.name === appCommand.name
-    );
-    const permissions = generateAllPermissions(
-      command?.allowedRoles ?? [],
-      command?.allowedUsers ?? []
-    );
-    return {
-      id: appCommand.id,
-      permissions,
-    };
-  });
-}
-
-function generateAllPermissions(
-  allowedRoles: Snowflake[],
-  allowedUsers: Snowflake[]
-): ApplicationCommandPermissionData[] {
-  const rolePermissions = generateRolePermissions(allowedRoles);
-  const userPermissions = generateUserPermissions(allowedUsers);
-  return rolePermissions.concat(userPermissions);
-}
-
-function generateRolePermissions(
-  allowedRoles: Snowflake[]
-): ApplicationCommandPermissionData[] {
-  return allowedRoles.map(
-    (role): ApplicationCommandPermissionData => ({
-      type: 'ROLE',
-      id: role,
-      permission: true,
-    })
-  );
-}
-
-function generateUserPermissions(
-  allowedUsers: Snowflake[]
-): ApplicationCommandPermissionData[] {
-  return allowedUsers.map(
-    (user): ApplicationCommandPermissionData => ({
-      type: 'USER',
-      id: user,
-      permission: true,
-    })
-  );
 }

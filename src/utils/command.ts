@@ -1,9 +1,10 @@
 import {
   ApplicationCommandOptionData,
   ApplicationCommandData,
-  Constants,
   ApplicationCommandChoicesData,
   ApplicationCommandSubGroupData,
+  ApplicationCommandOptionType,
+  ApplicationCommandType,
 } from 'discord.js';
 
 function normalizeOption(
@@ -34,17 +35,20 @@ function normalizeOption(
 
 // TODO: Replace when https://github.com/discordjs/discord.js/pull/6410 is merged.
 export function isChoiceBasedOption(
-  option: ApplicationCommandOptionData
+  option: unknown
 ): option is ApplicationCommandChoicesData {
+  if (!('type' in (option as object))) {
+    return false;
+  }
+
+  const optionCopy: ApplicationCommandOptionData =
+    option as ApplicationCommandOptionData;
+
   return (
-    option.type === 'BOOLEAN' ||
-    option.type === Constants.ApplicationCommandOptionTypes.BOOLEAN ||
-    option.type === 'INTEGER' ||
-    option.type === Constants.ApplicationCommandOptionTypes.INTEGER ||
-    option.type === 'STRING' ||
-    option.type === Constants.ApplicationCommandOptionTypes.STRING ||
-    option.type === 'NUMBER' ||
-    option.type === Constants.ApplicationCommandOptionTypes.NUMBER
+    optionCopy.type === ApplicationCommandOptionType.Boolean ||
+    optionCopy.type === ApplicationCommandOptionType.String ||
+    optionCopy.type === ApplicationCommandOptionType.Number ||
+    optionCopy.type === ApplicationCommandOptionType.Integer
   );
 }
 
@@ -52,18 +56,17 @@ export function isChoiceBasedOption(
 export function isSubOptionBasedOption(
   option: ApplicationCommandOptionData
 ): option is ApplicationCommandSubGroupData | ApplicationCommandSubGroupData {
-  return option.type === 'SUB_COMMAND' || option.type === 'SUB_COMMAND_GROUP';
+  return (
+    option.type === ApplicationCommandOptionType.Subcommand ||
+    option.type === ApplicationCommandOptionType.SubcommandGroup
+  );
 }
 
 export function toData(
   command: ApplicationCommandData
 ): ApplicationCommandData {
   // Normalize all of the options.
-  if (
-    !command.type ||
-    command.type === 'CHAT_INPUT' ||
-    command.type === Constants.ApplicationCommandTypes.CHAT_INPUT
-  ) {
+  if (!command.type || command.type === ApplicationCommandType.ChatInput) {
     // Normalize all of the options.
     const newOptions = command.options?.map(normalizeOption);
     return {
