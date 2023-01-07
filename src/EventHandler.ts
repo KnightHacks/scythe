@@ -57,9 +57,6 @@ export class EventHandler {
         }
 
         handler.onAutocomplete(interaction);
-      } else {
-        console.log('Unexpected interaction:');
-        console.log(interaction);
       }
     });
   }

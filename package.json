@@ -1,6 +1,6 @@
 {
   "name": "@knighthacks/scythe",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "type": "commonjs",
   "description": "A command-driven discord.js addon",
   "main": "./dist/index.js",
